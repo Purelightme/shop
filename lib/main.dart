@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shop/routes/route.dart';
 
+import 'authenticate/login.dart';
+import 'authenticate/register.dart';
 import 'category/category_index.dart';
 import 'dynamic/dynamic_index.dart';
 import 'index/index.dart';
@@ -35,9 +38,10 @@ class _MyAppState extends State<MyApp> {
         primaryColor: Colors.redAccent,
         primarySwatch: Colors.red,
       ),
+      routes: routes,
       home: Scaffold(
         appBar: AppBar(
-          title: Text('方方小店'),
+          title: Text('一个小店'),
         ),
         body: _children[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
@@ -63,7 +67,7 @@ class _MyAppState extends State<MyApp> {
                           _currentIndex == 1 ? Colors.redAccent : Colors.black),
                 )),
             BottomNavigationBarItem(
-                icon: new Icon(Icons.person,
+                icon: new Icon(Icons.explore,
                     color: _currentIndex == 2 ? Colors.redAccent : Colors.grey),
                 title: Text(
                   '动态',
@@ -81,6 +85,16 @@ class _MyAppState extends State<MyApp> {
                           _currentIndex == 3 ? Colors.redAccent : Colors.black),
                 )),
           ],
+        ),
+        floatingActionButton: Builder(
+            builder: (context) => FloatingActionButton(
+                onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => Login())
+                  );
+                },
+              child: Icon(Icons.palette),
+            )
         ),
       ),
     );

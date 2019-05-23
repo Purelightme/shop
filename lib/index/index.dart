@@ -13,6 +13,7 @@ class _indexState extends State<Index> {
       child: Column(
         children: <Widget>[
           CarouselSlider(
+            autoPlay: true,
             height: 200.0,
             items: <Widget>[
               Container(
@@ -60,7 +61,7 @@ class _indexState extends State<Index> {
           Row(
             children: <Widget>[
               Container(
-                  margin: EdgeInsets.only(top: 50, left: 60),
+                  margin: EdgeInsets.only(top: 20, left: 8.0,bottom: 8.0),
                   child: Text(
                     '推荐',
                     style: TextStyle(
@@ -69,6 +70,14 @@ class _indexState extends State<Index> {
             ],
           ),
           Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Colors.grey,
+                width: 1.0
+              ),
+              borderRadius: BorderRadius.all(Radius.circular(10))
+            ),
+            padding: EdgeInsets.all(1.0),
             height: 200,
             child: ListView(
               scrollDirection: Axis.horizontal,
