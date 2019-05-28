@@ -20,7 +20,7 @@ class _ReceiveAddressState extends State<ReceiveAddress> {
 //      height: 100,
       padding: EdgeInsets.only(left: 30.0,top: 20,bottom: 20),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,9 +51,9 @@ class _ReceiveAddressState extends State<ReceiveAddress> {
               Text(address.street),
             ],
           ),
-          Expanded(
-            child: Icon(Icons.lens),
-          )
+//          Expanded(
+//            child: Icon(Icons.lens),
+//          )
         ],
       )
     );

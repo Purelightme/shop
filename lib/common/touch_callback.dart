@@ -6,12 +6,15 @@ class TouchCallback extends StatefulWidget {
     Key key,
     @required this.child,@required this.onPressed,
     this.isFeed:true,
-    this.backgroud:const Color(0xffd8d8d8)
+    this.backgroud:const Color(0xffd8d8d8),
+    this.onLongPressed
   }):super(key:key);
 
   final Widget child;
 
   final onPressed;
+
+  final onLongPressed;
 
   final bool isFeed;
 
@@ -45,6 +48,7 @@ class _TouchCallbackState extends State<TouchCallback> {
           color = Colors.transparent;
         });
       },
+      onLongPress: widget.onLongPressed,
     );
   }
 }

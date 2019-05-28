@@ -1,0 +1,28 @@
+PODS:
+  - city_pickers (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - image_picker_saver (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - city_pickers (from `.symlinks/plugins/city_pickers/ios`)
+  - Flutter (from `.symlinks/flutter/ios`)
+  - image_picker_saver (from `.symlinks/plugins/image_picker_saver/ios`)
+
+EXTERNAL SOURCES:
+  city_pickers:
+    :path: ".symlinks/plugins/city_pickers/ios"
+  Flutter:
+    :path: ".symlinks/flutter/ios"
+  image_picker_saver:
+    :path: ".symlinks/plugins/image_picker_saver/ios"
+
+SPEC CHECKSUMS:
+  city_pickers: b0370f4c35c201723b5b7fcce10ec29b59d5bc35
+  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
+  image_picker_saver: 4f28bd70e1efdca68ad88beab0f11d22cffe04f6
+
+PODFILE CHECKSUM: aff02bfeed411c636180d6812254b2daeea14d09
+
+COCOAPODS: 1.6.2

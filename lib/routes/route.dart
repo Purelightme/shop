@@ -1,11 +1,16 @@
 
 import 'package:flutter/material.dart';
+import 'package:shop/category/product/product_detail.dart';
 import 'package:shop/my/about/about.dart';
+import 'package:shop/my/about/introduction.dart';
+import 'package:shop/my/about/store_info.dart';
 import 'package:shop/my/cart/cart.dart';
 import 'package:shop/my/profile/profile.dart';
+import 'package:shop/my/profile/update_nickname.dart';
 import 'package:shop/my/receive_address/add_address.dart';
 import 'package:shop/my/receive_address/receive_address.dart';
 import 'package:shop/my/usage/usage.dart';
+import 'package:shop/search/search.dart';
 
 final routes = {
   '/cart': (BuildContext context) => Cart(),
@@ -14,6 +19,10 @@ final routes = {
   '/usage': (BuildContext context) => Usage(),
   '/about': (BuildContext context) => About(),
   '/profile': (BuildContext context) => Profile(),
-
+  '/search': (BuildContext context) => Search(),
+  '/store_info': (BuildContext context) => StoreInfo(),
+  '/introduction': (BuildContext context) => Introduction(),
+  '/update_nickname': (BuildContext context) => UpdateNickname(),
+  '/product_detail': (BuildContext context) => ProductDetail(),
 
 };

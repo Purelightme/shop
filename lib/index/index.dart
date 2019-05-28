@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shop/category/product/product_detail.dart';
+import 'package:shop/common/touch_callback.dart';
 
 class Index extends StatefulWidget {
   @override
@@ -59,6 +61,7 @@ class _indexState extends State<Index> {
             ],
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               Container(
                   margin: EdgeInsets.only(top: 20, left: 8.0,bottom: 8.0),
@@ -67,6 +70,14 @@ class _indexState extends State<Index> {
                     style: TextStyle(
                         fontSize: 20.0, color: Colors.deepOrangeAccent),
                   )),
+              Container(
+                child: GestureDetector(
+                  child: Text('搜索'),
+                  onTap: (){
+                    Navigator.of(context).pushNamed('/search');
+                  },
+                ),
+              ),
             ],
           ),
           Container(
@@ -82,15 +93,24 @@ class _indexState extends State<Index> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: <Widget>[
-                Stack(
-                  children: <Widget>[
-                    Image.asset('images/banners/xiezi.jpeg'),
-                    Positioned(
-                      bottom: 100,
-                      right: 100,
-                      child: Text('阿迪达斯-A35'),
-                    )
-                  ],
+                TouchCallback(
+                  child: Stack(
+                    children: <Widget>[
+                      Image.asset('images/banners/xiezi.jpeg'),
+                      Positioned(
+                        bottom: 100,
+                        right: 100,
+                        child: Text('阿迪达斯-A35'),
+                      )
+                    ],
+                  ),
+                  onPressed: (){
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context){
+                        return ProductDetail(ProductId: 1,);
+                      })
+                    );
+                  },
                 ),
                 Stack(
                   children: <Widget>[
