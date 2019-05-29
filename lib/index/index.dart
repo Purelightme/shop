@@ -78,6 +78,14 @@ class _indexState extends State<Index> {
                   },
                 ),
               ),
+              Container(
+                child: GestureDetector(
+                  child: Text('搜索2'),
+                  onTap: (){
+                    Navigator.of(context).pushNamed('/search2');
+                  },
+                ),
+              ),
             ],
           ),
           Container(

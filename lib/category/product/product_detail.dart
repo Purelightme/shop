@@ -398,6 +398,7 @@ class _ProductDetailState extends State<ProductDetail> {
                 Container(
                   padding: EdgeInsets.all(10),
                   child: GridView.count(
+                    physics: new NeverScrollableScrollPhysics(),
                     crossAxisCount: 2,
                     shrinkWrap: true,
                     crossAxisSpacing: 10,

@@ -23,6 +23,11 @@ class _CategoryIndexState extends State<CategoryIndex> {
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'牛仔裤'},
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'打底裤'},
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'西装裤'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'裙子'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'休闲群'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'牛仔裤'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'打底裤'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'西装裤'},
         ]
       },
       {
@@ -32,6 +37,11 @@ class _CategoryIndexState extends State<CategoryIndex> {
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'衬衫'},
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'毛衣'},
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'卫衣'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'裙子'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'休闲群'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'牛仔裤'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'打底裤'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'西装裤'},
         ]
       }
     ],
@@ -39,6 +49,11 @@ class _CategoryIndexState extends State<CategoryIndex> {
       {
         'title':'零食',
         'childs':[
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'裙子'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'休闲群'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'牛仔裤'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'打底裤'},
+          {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'西装裤'},
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'裙子'},
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'休闲群'},
           {'imageCover':'https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg','title':'牛仔裤'},
@@ -134,6 +149,7 @@ class _CategoryIndexState extends State<CategoryIndex> {
             ),
             child: GridView.count(
                 crossAxisCount: 3,
+                physics: new NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
@@ -159,22 +175,32 @@ class _CategoryIndexState extends State<CategoryIndex> {
                 }).toList()
             )
         ),
-
       ],
     );
   }
 
   Widget _buildRight() {
+
+    List<Widget> rights = [];
+
+    rights = children[_currentIndex].map<Widget>(
+            (item) => _buildRightItem(item)
+    ).toList();
+
+    rights.add(Container(
+      padding: EdgeInsets.only(bottom: 10),
+      child: Center(
+        child: Text('---到底了---'),
+      ),
+    ));
+
     return Container(
       color: Colors.grey.withOpacity(0.2),
       child: ListView(
-          children: children[_currentIndex].map<Widget>(
-                  (item) => _buildRightItem(item)
-          ).toList()
+          children: rights
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
