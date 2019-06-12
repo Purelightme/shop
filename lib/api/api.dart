@@ -1,0 +1,1 @@
+const api_prefix = 'http://shop.test/api';

@@ -56,14 +56,27 @@ class _VideoDetailState extends State<VideoDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: ListView(
+//        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           _controller.value.initialized
             ? AspectRatio(
           aspectRatio: _controller.value.aspectRatio,
           child: VideoPlayer(_controller),
-        ) : Container(),
+        ) : Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('images/banners/xiezi.jpeg'),
+                fit: BoxFit.fitWidth
+              )
+            ),
+            child: AspectRatio(
+              aspectRatio: 16/9,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          ),
           Container(
             padding: EdgeInsets.all(10),
             child: Text('评论'),

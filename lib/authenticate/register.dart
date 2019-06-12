@@ -1,7 +1,10 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shop/api/api.dart';
 import 'package:shop/common/notification.dart';
+import 'package:http/http.dart' as http;
+import 'package:shop/models/common_res_model.dart';
 
 
 class Register extends StatefulWidget {
@@ -22,6 +25,8 @@ class _RegisterState extends State<Register> {
   Timer countDownTimer;
   bool isSendBtnDisabled = false;
 
+  CommonResModel _commonResModel;
+
   @override
   void dispose(){
     countDownTimer?.cancel();
@@ -34,7 +39,14 @@ class _RegisterState extends State<Register> {
     if (registerForm.validate()){
       registerForm.save();
       print("email:$email,code:$code,password:$password,password_confirmation:$passwordConfirmation");
-//      Navigator.of(context).push(route);
+      http.post(api_prefix + '/user/auth/register',body: {
+        'email':email,
+        'code':code,
+        'password':password,
+        'password_confirmation':passwordConfirmation
+      }).then((res){
+        print(json.decode(res.body));
+      });
     }
   }
 
@@ -46,8 +58,7 @@ class _RegisterState extends State<Register> {
         title: Text('注册'),
       ),
       resizeToAvoidBottomPadding: false,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      body: ListView(
         children: <Widget>[
           Container(
             padding: EdgeInsets.all(16.0),
@@ -86,21 +97,29 @@ class _RegisterState extends State<Register> {
                                   showToast(context,'请等待${60-waitSeconds}s',duration: 3,gravity: 300);
                                   return;
                                 }
-                                countDownTimer = Timer.periodic(Duration(seconds: 1), (timer){
-                                  print(waitSeconds);
-                                  setState(() {
-                                    if (waitSeconds < 60){
-                                      waitText = '${60-waitSeconds}秒后可重新获取';
-                                      waitSeconds += 1;
-                                    }else{
-                                      waitText = '重新获取';
-                                      waitSeconds = 0;
-                                      countDownTimer.cancel();
-                                      countDownTimer = null;
-                                    }
-                                  });
+                                http.post(api_prefix + '/user/auth/register_code',body: {
+                                  'email':email
+                                }).then((res){
+                                  _commonResModel = CommonResModel.fromJson(json.decode(res.body));
+                                  if (_commonResModel.errcode != 0){
+                                    showToast(context,_commonResModel.errmsg,duration: 3);
+                                  }else{
+                                    countDownTimer = Timer.periodic(Duration(seconds: 1), (timer){
+                                      setState(() {
+                                        if (waitSeconds < 60){
+                                          waitText = '${60-waitSeconds}秒后可重新获取';
+                                          waitSeconds += 1;
+                                        }else{
+                                          waitText = '重新获取';
+                                          waitSeconds = 0;
+                                          countDownTimer.cancel();
+                                          countDownTimer = null;
+                                        }
+                                      });
+                                    });
+                                    showToast(context,'验证码已发送到:$email',duration: 3);
+                                  }
                                 });
-                                showToast(context,'验证码已发送到:$email',duration: 3);
                               }
                             },
                           disabledColor: Colors.grey,
@@ -137,7 +156,7 @@ class _RegisterState extends State<Register> {
                       onFieldSubmitted: (value){},
                       obscureText: true,
                       validator: (value){
-                        return value != password ? '两次密码不一致' : null;
+                        return passwordConfirmation != password ? '两次密码不一致' : null;
                       },
                     ),
                   ],

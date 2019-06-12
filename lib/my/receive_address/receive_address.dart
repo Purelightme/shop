@@ -17,43 +17,46 @@ class _ReceiveAddressState extends State<ReceiveAddress> {
 
   Widget _buildAddressItem(Address address){
     return Container(
-//      height: 100,
       padding: EdgeInsets.only(left: 30.0,top: 20,bottom: 20),
       child: Row(
-//        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Baseline(
-                    baseline: 0.0,
-                    baselineType: TextBaseline.alphabetic,
-                    child: Text(address.name,style: TextStyle(
-                        fontSize: 18.0
-                    ),),
-                  ),
-                  Baseline(
+          CircleAvatar(
+            child: Text(address.name.substring(0,1),style: TextStyle(
+              fontSize: 14,
+            ),),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Baseline(
                       baseline: 0.0,
                       baselineType: TextBaseline.alphabetic,
-                      child: Container(
-                        margin: EdgeInsets.only(left: 10),
-                        child: Text(address.phone,style: TextStyle(
-                            fontSize: 12.0,
-                            color: Colors.grey
-                        ),),
-                      )
-                  ),
-                ],
-              ),
-              Text('${address.province} ${address.city} ${address.area}'),
-              Text(address.street),
-            ],
-          ),
-//          Expanded(
-//            child: Icon(Icons.lens),
-//          )
+                      child: Text(address.name,style: TextStyle(
+                          fontSize: 18.0
+                      ),),
+                    ),
+                    Baseline(
+                        baseline: 0.0,
+                        baselineType: TextBaseline.alphabetic,
+                        child: Container(
+                          margin: EdgeInsets.only(left: 10),
+                          child: Text(address.phone,style: TextStyle(
+                              fontSize: 12.0,
+                              color: Colors.grey
+                          ),),
+                        )
+                    ),
+                  ],
+                ),
+                Text('${address.province} ${address.city} ${address.area}'),
+                Text(address.street),
+              ],
+            ),
+          )
         ],
       )
     );

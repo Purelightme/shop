@@ -1,11 +1,13 @@
 
 import 'package:flutter/material.dart';
+import 'package:shop/category/category_index.dart';
 import 'package:shop/category/product/product_detail.dart';
 import 'package:shop/category/product/product_list.dart';
 import 'package:shop/my/about/about.dart';
 import 'package:shop/my/about/introduction.dart';
 import 'package:shop/my/about/store_info.dart';
 import 'package:shop/my/cart/cart.dart';
+import 'package:shop/my/message/message.dart';
 import 'package:shop/my/profile/profile.dart';
 import 'package:shop/my/profile/update_nickname.dart';
 import 'package:shop/my/receive_address/add_address.dart';
@@ -27,4 +29,6 @@ final routes = {
   '/update_nickname': (BuildContext context) => UpdateNickname(),
   '/product_detail': (BuildContext context) => ProductDetail(),
   '/search2': (BuildContext context) => Search2.Search(),
+  '/message': (BuildContext context) => Message(),
+  '/category': (BuildContext context) => CategoryIndex(),
 };

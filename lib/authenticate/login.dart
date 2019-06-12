@@ -1,5 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shop/api/api.dart';
 import 'package:shop/authenticate/register.dart';
+import 'package:http/http.dart' as http;
+import 'package:shop/common/notification.dart';
+import 'package:shop/models/user_model.dart';
+import 'package:shop/my/my_index.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -14,12 +21,34 @@ class _LoginState extends State<Login> {
   String password;
   bool _isSecureText = true;
 
+  UserModel _userModel;
+
   _login(){
     var loginForm = loginKey.currentState;
     if (loginForm.validate()){
       loginForm.save();
-      print("email:$email,password:$password");
-//      Navigator.of(context).push(route);
+      http.post(api_prefix + '/user/auth/login',body: {
+        'email':email,
+        'password':password
+      }).then((res)async{
+        setState(() {
+          _userModel = UserModel.fromJson(json.decode(res.body));
+        });
+        if(_userModel.errcode != 0){
+          showToast(context,_userModel.errmsg);
+        }else{
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('token', _userModel.data.token);
+          Navigator.of(context).push(MaterialPageRoute(builder: (context){
+            return Scaffold(
+              appBar: AppBar(
+                title: Text('一个小店'),
+              ),
+              body: MyIndex(),
+            );
+          }));
+        }
+      });
     }
   }
 
@@ -29,22 +58,25 @@ class _LoginState extends State<Login> {
       appBar: AppBar(
         title: Text('登录'),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      body: ListView(
         children: <Widget>[
           Container(
             margin: EdgeInsets.only(top: 20),
             padding: EdgeInsets.all(10.0),
-            child: Text('一小店',style: TextStyle(
-              fontSize: 20.0,
-              fontFamily: 'Roboto',
-            ),),
+            child: Center(
+              child: Text('一小店',style: TextStyle(
+                fontSize: 20.0,
+                fontFamily: 'Roboto',
+              ),),
+            )
           ),
           Container(
             padding: EdgeInsets.all(10.0),
-            child: Text('自从遇见你，就不再打烊',style: TextStyle(
-                fontSize: 10.0
-            ),),
+            child: Center(
+              child: Text('自从遇见你，就不再打烊',style: TextStyle(
+                  fontSize: 10.0
+              ),),
+            ),
           ),
           Container(
             padding: EdgeInsets.all(16.0),

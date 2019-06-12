@@ -10,20 +10,12 @@ class VideoCoverImage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Container(
-      child: Stack(
-        alignment: Alignment.topLeft,
-        children: <Widget>[
-          Image.network(url,
-            height: 200,
-            width: MediaQuery.of(context).size.width,
-            fit: BoxFit.fitWidth,
-          ),
-          Positioned(
-            left: MediaQuery.of(context).size.width/2-20,
-            top: 80,
-            child: Icon(Icons.play_circle_outline,size: 50,color: Colors.white,),
-          ),
-        ],
+      height: 200,
+      decoration: BoxDecoration(
+        image: DecorationImage(image: NetworkImage(url),fit: BoxFit.fitWidth)
+      ),
+      child: Center(
+        child: Icon(Icons.play_circle_outline,size: 50,color: Colors.white,),
       ),
     );
   }

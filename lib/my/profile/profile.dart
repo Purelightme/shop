@@ -22,6 +22,37 @@ class _ProfileState extends State<Profile> {
       appBar: AppBar(
         title: Text('个人信息'),
         centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.more_horiz),
+            onPressed: (){
+              showMenu(
+                  context: context,
+                  position: RelativeRect.fromLTRB(500.0, 80.0, 0, 0),
+                  items: <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: Row(
+                        children: <Widget>[
+                          GestureDetector(
+                            child: Container(
+                              padding: EdgeInsets.only(left: 10.0),
+                              child: Text(
+                                '退出登录',
+                                style: TextStyle(color: Colors.redAccent),
+                              ),
+                            ),
+                            onTap: (){
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      ),
+                    )
+                  ]
+              );
+            },
+          ),
+        ],
       ),
       body: ListView(
         children: <Widget>[
