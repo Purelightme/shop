@@ -36,6 +36,7 @@ class Data {
   int points;
   String guarantee;
   List<String> details;
+  List<Specifications> specifications;
 
   Data(
       {this.id,
@@ -50,7 +51,8 @@ class Data {
         this.monthSales,
         this.points,
         this.guarantee,
-        this.details});
+        this.details,
+        this.specifications});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -66,6 +68,12 @@ class Data {
     points = json['points'];
     guarantee = json['guarantee'];
     details = json['details'].cast<String>();
+    if (json['specifications'] != null) {
+      specifications = new List<Specifications>();
+      json['specifications'].forEach((v) {
+        specifications.add(new Specifications.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -83,6 +91,99 @@ class Data {
     data['points'] = this.points;
     data['guarantee'] = this.guarantee;
     data['details'] = this.details;
+    if (this.specifications != null) {
+      data['specifications'] =
+          this.specifications.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Specifications {
+  String title;
+  int sort;
+  String rootTitle;
+  List<FirstChildren> children;
+
+  Specifications({this.title, this.sort, this.rootTitle, this.children});
+
+  Specifications.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    sort = json['sort'];
+    rootTitle = json['root_title'];
+    if (json['children'] != null) {
+      children = new List<FirstChildren>();
+      json['children'].forEach((v) {
+        children.add(new FirstChildren.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['title'] = this.title;
+    data['sort'] = this.sort;
+    data['root_title'] = this.rootTitle;
+    if (this.children != null) {
+      data['children'] = this.children.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class FirstChildren {
+  String title;
+  int sort;
+  String rootTitle;
+  List<SecondChildren> children;
+
+  FirstChildren({this.title, this.sort, this.rootTitle, this.children});
+
+  FirstChildren.fromJson(Map<String, dynamic> json) {
+    title = json['title'];
+    sort = json['sort'];
+    rootTitle = json['root_title'];
+    if (json['children'] != null) {
+      children = new List<SecondChildren>();
+      json['children'].forEach((v) {
+        children.add(new SecondChildren.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['title'] = this.title;
+    data['sort'] = this.sort;
+    data['root_title'] = this.rootTitle;
+    if (this.children != null) {
+      data['children'] = this.children.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class SecondChildren {
+  int id;
+  int productId;
+  String price;
+  int stock;
+
+  SecondChildren({this.id, this.productId, this.price, this.stock});
+
+  SecondChildren.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    productId = json['product_id'];
+    price = json['price'];
+    stock = json['stock'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['product_id'] = this.productId;
+    data['price'] = this.price;
+    data['stock'] = this.stock;
     return data;
   }
 }

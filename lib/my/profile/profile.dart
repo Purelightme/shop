@@ -1,20 +1,61 @@
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker_saver/image_picker_saver.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/api/api.dart';
 import 'package:shop/common/notification.dart';
 import 'package:shop/common/touch_callback.dart';
-import 'package:flutter/services.dart';
+import 'package:shop/models/common_res_model.dart';
+import 'package:shop/models/user_model.dart';
+import 'package:shop/my/profile/update_nickname.dart';
+import 'package:http/http.dart' as http;
 
 
 class Profile extends StatefulWidget {
+
+  Profile({@required this.userModel});
+
+  UserModel userModel;
+
   @override
   _ProfileState createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
   File _image;
-  List<File> files = [];
+
+  _updateAvatar()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+
+    String path = _image.path;
+    var name = path.substring(path.lastIndexOf("/") + 1, path.length);
+    var suffix = name.substring(name.lastIndexOf(".") + 1, name.length);
+
+    FormData formData = new FormData.from({
+      "avatar": new UploadFileInfo(new File(path), name,
+          contentType: ContentType.parse("image/$suffix"))
+    });
+
+    Dio dio = new Dio();
+    Options options = Options(headers: {
+      'Authorization':'Bearer ' + token
+    });
+    dio.post<String>(api_prefix + '/user/update', data: formData,options: options).then((res){
+      CommonResModel commonResModel = CommonResModel.fromJson(json.decode(res.data));
+      if (commonResModel.errcode != 0){
+        showToast(context, commonResModel.errmsg);
+      }else{
+        Navigator.of(context).pop();
+        //todo 跳转
+      }
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +110,7 @@ class _ProfileState extends State<Profile> {
                     children: <Widget>[
                       CircleAvatar(
                         backgroundImage: _image == null ?
-                        AssetImage('images/banners/xiezi.jpeg') :
+                        NetworkImage(widget.userModel.data.avatar) :
                         FileImage(_image),
                       ),
                       Icon(Icons.arrow_forward_ios)
@@ -92,9 +133,7 @@ class _ProfileState extends State<Profile> {
                             _image = await ImagePickerSaver.pickImage(
                                 source: ImageSource.camera
                             );
-                            setState(() {
-                              
-                            });
+                            _updateAvatar();
                             Navigator.pop(context);
                           },
                         ),
@@ -105,9 +144,7 @@ class _ProfileState extends State<Profile> {
                             _image = await ImagePickerSaver.pickImage(
                                 source: ImageSource.gallery
                             );
-                            setState(() {
-                              
-                            });
+                            _updateAvatar();
                             Navigator.pop(context);
                           },
                         ),
@@ -129,7 +166,7 @@ class _ProfileState extends State<Profile> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Text('Purelightme'),
+                        Text(widget.userModel.data.name),
                         Icon(Icons.arrow_forward_ios)
                       ],
                     )
@@ -137,7 +174,9 @@ class _ProfileState extends State<Profile> {
                 )
             ),
             onPressed: (){
-              Navigator.of(context).pushNamed('/update_nickname');
+              Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                return UpdateNickname(origin: widget.userModel.data.name,);
+              }));
             },
           ),
           Divider(),
@@ -152,8 +191,7 @@ class _ProfileState extends State<Profile> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Text('591592159@qq.com'),
-//                        Icon(Icons.arrow_forward_ios)
+                        Text(widget.userModel.data.email),
                       ],
                     )
                   ],

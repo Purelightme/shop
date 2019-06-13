@@ -1,5 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:shop/authenticate/login.dart';
+import 'package:shop/authenticate/register.dart';
 import 'package:shop/category/category_index.dart';
 import 'package:shop/category/product/product_detail.dart';
 import 'package:shop/category/product/product_list.dart';
@@ -31,4 +33,6 @@ final routes = {
   '/search2': (BuildContext context) => Search2.Search(),
   '/message': (BuildContext context) => Message(),
   '/category': (BuildContext context) => CategoryIndex(),
+  '/login': (BuildContext context) => Login(),
+  '/register': (BuildContext context) => Register(),
 };

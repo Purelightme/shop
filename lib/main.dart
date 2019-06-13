@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/routes/route.dart';
 
 import 'activity/activity_index.dart';
@@ -47,6 +48,12 @@ class _MyAppState extends State<MyApp> {
         home: Scaffold(
           appBar: AppBar(
             title: Text('一个小店'),
+            actions: <Widget>[
+              IconButton(icon: Icon(Icons.delete_forever), onPressed: ()async{
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.remove('token');
+              })
+            ],
           ),
           body: _children[_currentIndex],
           bottomNavigationBar: BottomNavigationBar(

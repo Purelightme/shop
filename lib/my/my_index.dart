@@ -8,6 +8,7 @@ import 'package:flutter_badge/flutter_badge.dart';
 import 'package:shop/models/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/my/profile/profile.dart';
 
 import 'order/order_list.dart';
 
@@ -57,7 +58,7 @@ class _MyIndexState extends State<MyIndex> {
 
   _getBaseInfo()async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token = await prefs.getString('token') ?? '';
+    String token = prefs.getString('token') ?? '';
     if (token.isNotEmpty){
       http.get(api_prefix + '/user/info',headers: {
         'Authorization':'Bearer ' + token
@@ -72,22 +73,25 @@ class _MyIndexState extends State<MyIndex> {
 
   @override
   Widget build(BuildContext context) {
-    return _isLogined ? ListView(
+    return ListView(
       children: <Widget>[
+        _isLogined ?
         Container(
           margin: EdgeInsets.only(top: 20.0),
           color: Colors.white,
           height: 80.0,
           child: TouchCallback(
             onPressed: (){
-              Navigator.of(context).pushNamed('/profile');
+              Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                return Profile(userModel: _userModel,);
+              }));
             },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(left: 12.0,right: 15.0),
-                  child: Image.asset('images/banners/clothes.jpeg',width: 70.0,height: 70.0,),
+                  child: Image.network(_userModel.data.avatar,width: 70.0,height: 70.0,),
                 ),
                 Expanded(
                   child: Column(
@@ -107,10 +111,34 @@ class _MyIndexState extends State<MyIndex> {
                 ),
                 Container(
                   margin: EdgeInsets.only(left: 12.0,right: 15.0),
-                  child: Image.asset('images/banners/clothes.jpeg',width: 24.0,height: 24.0,),
+                  child: Image.network(_userModel.data.avatar,width: 24.0,height: 24.0,),
                 ),
               ],
             ),
+          ),
+        ) :
+        Container(
+          margin: EdgeInsets.only(top: 20.0),
+          color: Colors.white,
+          height: 80.0,
+          child: ButtonBar(
+            alignment: MainAxisAlignment.center,
+            children: <Widget>[
+              OutlineButton(
+                child: Text('登录'),
+                borderSide: BorderSide(color: Colors.redAccent),
+                onPressed: (){
+                  Navigator.of(context).pushNamed('/login');
+                },
+              ),
+              OutlineButton(
+                child: Text('注册'),
+                borderSide: BorderSide(color: Colors.redAccent),
+                onPressed: (){
+                  Navigator.of(context).pushNamed('/register');
+                },
+              ),
+            ],
           ),
         ),
         Container(
@@ -209,10 +237,6 @@ class _MyIndexState extends State<MyIndex> {
           ),
         ),
       ],
-    ) : Container(
-      child: Center(
-        child: Text('未登录'),
-      ),
     );
   }
 }

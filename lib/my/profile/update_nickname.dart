@@ -1,6 +1,18 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/api/api.dart';
+import 'package:shop/common/notification.dart';
+import 'package:shop/models/common_res_model.dart';
 
 class UpdateNickname extends StatefulWidget {
+
+  UpdateNickname({@required this.origin});
+
+  String origin;
+
   @override
   _UpdateNicknameState createState() => _UpdateNicknameState();
 }
@@ -17,17 +29,6 @@ class _UpdateNicknameState extends State<UpdateNickname> {
         title: Text('修改昵称'),
         centerTitle: true,
       ),
-//      body: Row(
-//        children: <Widget>[
-//          TextField(
-//            controller: _controller,
-//            decoration: new InputDecoration(
-//              hintText: 'Purelightme',
-//            ),
-//          ),
-//          Text('2-10个字符，可由中英文，数字，"_"，"-"组成')
-//        ],
-//      ),
     body: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
@@ -35,11 +36,9 @@ class _UpdateNicknameState extends State<UpdateNickname> {
           autofocus: true,
           controller: _controller,
           decoration: new InputDecoration(
-            hintText: 'Purelightme',
-//            border: OutlineInputBorder(
-//
-//            )
+            hintText: widget.origin,
           ),
+          maxLength: 10,
         ),
         Container(
           width: 10,
@@ -49,14 +48,22 @@ class _UpdateNicknameState extends State<UpdateNickname> {
           width: 340,
           height: 42,
           child: RaisedButton(
-            onPressed: () {
-              showDialog(
-                context: context,
-                child: new AlertDialog(
-                  title: new Text('What you typed'),
-                  content: new Text(_controller.text),
-                ),
-              );
+            onPressed: ()async{
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              String token = prefs.getString('token') ?? '';
+              http.post(api_prefix + '/user/update',headers: {
+                'Authorization':'Bearer ' + token
+              },body: {
+                'name': _controller.text
+              }).then((res){
+                CommonResModel _commonResModel = CommonResModel.fromJson(json.decode(res.body));
+                if (_commonResModel.errcode != 0){
+                  showToast(context,_commonResModel.errmsg);
+                }else{
+                  Navigator.of(context).pop();
+                  //todo 跳转
+                }
+              });
             },
             color: Colors.redAccent,
             child: Text('确定',style: TextStyle(

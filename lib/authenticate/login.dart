@@ -31,6 +31,7 @@ class _LoginState extends State<Login> {
         'email':email,
         'password':password
       }).then((res)async{
+        print(json.decode(res.body));
         setState(() {
           _userModel = UserModel.fromJson(json.decode(res.body));
         });
