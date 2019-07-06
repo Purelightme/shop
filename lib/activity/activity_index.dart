@@ -1,4 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shop/api/api.dart';
+import 'package:shop/common/notification.dart';
+import 'package:shop/models/activity_list_model.dart';
 
 import 'activity_detail.dart';
 
@@ -8,7 +14,32 @@ class ActivityIndex extends StatefulWidget {
 }
 
 class _ActivityIndexState extends State<ActivityIndex> {
-  Widget _buildItem() {
+
+  List<Item> _items;
+  int _page;
+  bool _isLoading = true;
+
+  @override
+  initState(){
+    super.initState();
+    _getFirstPage();
+  }
+
+  _getFirstPage()async{
+    http.get(api_prefix + '/activities').then((res){
+      ActivityListModel activityListModel = ActivityListModel.fromJson(json.decode(res.body));
+      if(activityListModel.errcode != 0){
+        showToast(context,activityListModel.errmsg);
+      }else{
+        setState(() {
+          _items = activityListModel.data.data;
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  Widget _buildItem(Item item) {
     return GestureDetector(
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
@@ -18,7 +49,7 @@ class _ActivityIndexState extends State<ActivityIndex> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Image.asset('images/banners/xiezi.jpeg'),
+              Image.network(item.imageCover),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -32,14 +63,14 @@ class _ActivityIndexState extends State<ActivityIndex> {
                             Baseline(
                               baseline: 16,
                               baselineType: TextBaseline.alphabetic,
-                              child: Text('六一钜惠',style: TextStyle(
+                              child: Text(item.title,style: TextStyle(
                                   fontSize: 22
                               ),),
                             ),
                             Baseline(
                               baseline: 16,
                               baselineType: TextBaseline.alphabetic,
-                              child: Text(' 共29件商品参与7折优惠',style: TextStyle(
+                              child: Text(' 共${item.productNum}件商品参与${item.discount}折优惠',style: TextStyle(
                                   fontSize: 12
                               ),),
                             ),
@@ -49,14 +80,14 @@ class _ActivityIndexState extends State<ActivityIndex> {
                       Container(
                           padding: EdgeInsets.all(10),
                           width: 200,
-                          child: Text('61儿童节服装折扣即将开始，打破底价就是现在',
+                          child: Text(item.describe,
                             softWrap: true,overflow: TextOverflow.ellipsis,)
                       )
                     ],
                   ),
                   Container(
                     padding: EdgeInsets.all(10),
-                    child: Text('待开始'),
+                    child: Text(item.status),
                   )
                 ],
               )
@@ -74,14 +105,13 @@ class _ActivityIndexState extends State<ActivityIndex> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return _isLoading ? Container() : Container(
       child: Center(
         child: RefreshIndicator(
           child: ListView(
-            children: <Widget>[
-              _buildItem(),
-              _buildItem(),
-            ],
+            children: _items.map((item){
+              return _buildItem(item);
+            }).toList()
           ),
           onRefresh: (){
             Future.delayed(Duration(seconds: 1)).then((res){

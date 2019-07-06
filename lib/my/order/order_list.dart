@@ -1,68 +1,92 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:shop/category/product/product_detail.dart';
+import 'package:shop/api/api.dart';
 import 'package:shop/common/common.dart';
 import 'package:shop/common/notification.dart';
-import 'dart:math';
-
-import 'package:shop/common/touch_callback.dart';
-
+import 'package:shop/models/order_list_model.dart';
+import 'package:shop/utils/token.dart';
 import 'order_detail.dart';
+import 'package:http/http.dart' as http;
 
 class OrderList extends StatefulWidget {
+
+  OrderList({@required this.status});
+
+  int status;
+
   @override
   _OrderListState createState() => _OrderListState();
 }
 
-class _OrderListState extends State<OrderList> {
+class _OrderListState extends State<OrderList> with SingleTickerProviderStateMixin {
+
+  Map<int,List> _items = {
+    -1:<Item>[],
+    1:<Item>[],
+    3:<Item>[],
+    4:<Item>[],
+    5:<Item>[],
+  };
+
+  Map<int,int> indexes = {
+    -1:0,
+    1:1,
+    3:2,
+    4:3,
+    5:4
+  };
 
   TabController _tabController;
 
-  Widget _buildProductItem(){
+  Widget _buildProductItem(int status,int index,SpecificationSnapshot sp){
     return Container(
         padding: EdgeInsets.all(10),
         color: Colors.grey.withOpacity(0.1),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(10),
               child: Row(
                 children: <Widget>[
                   CircleAvatar(
-                    backgroundImage: AssetImage('images/banners/shoes.jpeg'),
+                    backgroundImage: NetworkImage(sp.imageCover),
                   ),
                   Container(
+                    width: 200,
                     margin: EdgeInsets.only(left: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text('一字鲜麻辣龙虾尾虾球2盒装'),
-                        Text('规格：麻辣味')
+                        Text(sp.longTitle,softWrap: true,maxLines: 1,overflow: TextOverflow.ellipsis,),
+                        Text('规格：${sp.specificationString}')
                       ],
                     ),
                   )
                 ],
               ),
             ),
-            Column(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(10),
-                  child: Text('\$39.90'),
-                ),
-                Container(
-                  child: Text('*1',style: TextStyle(
-                      color: Colors.grey.withOpacity(0.5)
-                  ),),
-                )
-              ],
+            Expanded(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                  margin: EdgeInsets.all(10),
+                    child: Text('\￥${sp.price}',),
+                  ),
+                  Container(
+                    child: Text('×${sp.number}',style: TextStyle(
+                        color: Colors.grey.withOpacity(0.5)
+                    ),),
+                  )
+                ],
+              ),
             )
           ],
         ),
       );
   }
 
-  Widget _buildOrderItem(){
+  Widget _buildOrderItem(int status,int index){
     return GestureDetector(
       child: Container(
         child: Column(
@@ -72,23 +96,23 @@ class _OrderListState extends State<OrderList> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('订单号:467532435788'),
-                  Text('待评价',style: TextStyle(
+                  Text('订单号:${_items[status][index].orderNo}'),
+                  Text('${_items[status][index].statusDesc}',style: TextStyle(
                       color: Colors.redAccent
                   ),)
                 ],
               ),
             ),
-            _buildProductItem(),
-            _buildProductItem(),
-            _buildProductItem(),
+            ..._items[status][index].specificationSnapshot.map((sp){
+              return _buildProductItem(status,index,sp);
+            }).toList(),
             Container(
               padding: EdgeInsets.only(top: 8,right: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Text('共3件商品 合计\$99.00'),
-                  Text('(含运费\$5.00)')
+                  Text('共${_items[status][index].productNumber}件商品 合计￥${_items[status][index].amount}'),
+                  Text('(含运费￥${_items[status][index].expressFee})')
                 ],
               ),
             ),
@@ -165,7 +189,7 @@ class _OrderListState extends State<OrderList> {
       onTap: (){
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context){
-            return OrderDetail();
+            return OrderDetail(orderId: _items[status][index].id,);
           })
         );
       },
@@ -173,8 +197,55 @@ class _OrderListState extends State<OrderList> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _getFirstPageByStatus(widget.status);
+    _tabController = new TabController(length: 5, vsync: this)
+    ..addListener((){
+      if(_tabController.index.toDouble() == _tabController.animation.value){
+        switch (_tabController.index) {
+          case 0:
+            _getFirstPageByStatus(-1);
+            break;
+          case 1:
+            _getFirstPageByStatus(1);
+            break;
+          case 2:
+            _getFirstPageByStatus(3);
+            break;
+          case 3:
+            _getFirstPageByStatus(4);
+            break;
+          case 4:
+            _getFirstPageByStatus(5);
+            break;
+        }
+      }
+    });
+  }
+
+  _getFirstPageByStatus(int status)async{
+    String token = await getToken();
+    String url;
+    if(status == -1){
+      url = api_prefix + '/orders';
+    }else{
+      url = api_prefix + '/orders?status=$status';
+    }
+    http.get(url,headers: {
+      'Authorization':'Bearer $token'
+    }).then((res){
+      OrderListModel orderListModel = OrderListModel.fromJson(json.decode(res.body));
+      setState(() {
+        _items[status].addAll(orderListModel.data.data);
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return new DefaultTabController(
+      initialIndex: indexes[widget.status],
       length: 5,
       child: new Scaffold(
         appBar: new AppBar(
@@ -193,11 +264,12 @@ class _OrderListState extends State<OrderList> {
           ),
         ),
         body: new TabBarView(
-          children: [1,2,3,4,5].map((index){
-            return ListView(
-              children: [0,1,2,3,4,5,6,7].map((i){
-                  return _buildOrderItem();
-                }).toList()
+          children: [-1,1,3,4,5].map((status){
+            return ListView.builder(
+              itemCount: _items[status].length,
+              itemBuilder: (context,index){
+                return _buildOrderItem(status,index);
+              },
             );
           }).toList()
         ),

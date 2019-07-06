@@ -111,6 +111,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.3.2"
+  flutter_drag_scale:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "8a9fbd918bc0333216c7704342246b498c05a419"
+      url: "https://github.com/LiuC520/flutter_drag_scale.git"
+    source: git
+    version: "0.0.1"
   flutter_share_me:
     dependency: "direct main"
     description:
@@ -144,6 +153,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  gzx_dropdown_menu:
+    dependency: "direct main"
+    description:
+      name: gzx_dropdown_menu
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.2"
   http:
     dependency: "direct main"
     description:
@@ -246,7 +262,7 @@ packages:
       name: sqflite
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "1.1.5"
+    version: "1.1.6+1"
   stack_trace:
     dependency: transitive
     description:
@@ -274,7 +290,7 @@ packages:
       name: synchronized
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.0+1"
   term_glyph:
     dependency: transitive
     description:
@@ -289,13 +305,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.2.4"
-  timeline_list:
+  timeline:
     dependency: "direct main"
     description:
-      name: timeline_list
+      name: timeline
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.0.4"
+    version: "0.0.1"
   toast:
     dependency: "direct main"
     description:
@@ -316,7 +332,7 @@ packages:
       name: uuid
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   vector_math:
     dependency: transitive
     description:

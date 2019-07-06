@@ -8,11 +8,11 @@ class Arc extends CustomPainter{
   double radius;
 
   Paint _paint = Paint()
-    ..color = Colors.greenAccent
+    ..color = Colors.grey
     ..strokeCap = StrokeCap.square
     ..isAntiAlias = true
     ..strokeWidth = 5
-    ..style = PaintingStyle.stroke;
+    ..style = PaintingStyle.fill;
 
   @override
   void paint(Canvas canvas, Size size) {

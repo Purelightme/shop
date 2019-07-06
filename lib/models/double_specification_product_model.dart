@@ -1,11 +1,11 @@
-class ProductDetailModel {
+class DoubleSpecificationProductModel {
   int errcode;
   String errmsg;
   Data data;
 
-  ProductDetailModel({this.errcode, this.errmsg, this.data});
+  DoubleSpecificationProductModel({this.errcode, this.errmsg, this.data});
 
-  ProductDetailModel.fromJson(Map<String, dynamic> json) {
+  DoubleSpecificationProductModel.fromJson(Map<String, dynamic> json) {
     errcode = json['errcode'];
     errmsg = json['errmsg'];
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
@@ -36,7 +36,7 @@ class Data {
   int points;
   String guarantee;
   List<String> details;
-  List<Specifications> specifications;
+  List<DoubleSpecifications> specifications;
 
   Data(
       {this.id,
@@ -69,9 +69,9 @@ class Data {
     guarantee = json['guarantee'];
     details = json['details'].cast<String>();
     if (json['specifications'] != null) {
-      specifications = new List<Specifications>();
+      specifications = new List<DoubleSpecifications>();
       json['specifications'].forEach((v) {
-        specifications.add(new Specifications.fromJson(v));
+        specifications.add(new DoubleSpecifications.fromJson(v));
       });
     }
   }
@@ -99,15 +99,15 @@ class Data {
   }
 }
 
-class Specifications {
+class DoubleSpecifications {
   String title;
   int sort;
   String rootTitle;
   List<FirstChildren> children;
 
-  Specifications({this.title, this.sort, this.rootTitle, this.children});
+  DoubleSpecifications({this.title, this.sort, this.rootTitle, this.children});
 
-  Specifications.fromJson(Map<String, dynamic> json) {
+  DoubleSpecifications.fromJson(Map<String, dynamic> json) {
     title = json['title'];
     sort = json['sort'];
     rootTitle = json['root_title'];

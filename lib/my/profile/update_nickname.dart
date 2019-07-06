@@ -37,6 +37,7 @@ class _UpdateNicknameState extends State<UpdateNickname> {
           controller: _controller,
           decoration: new InputDecoration(
             hintText: widget.origin,
+            contentPadding: EdgeInsets.all(10)
           ),
           maxLength: 10,
         ),

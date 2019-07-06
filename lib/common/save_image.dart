@@ -6,7 +6,7 @@ void saveNetworkImage(context,String url) async {
   var response = await http.get(url);
   String result = await ImagePickerSaver.saveFile(fileData: response.bodyBytes);
   if (result.startsWith('/')){
-    showToast(context,'保存成功');
+    showToast(context,'图片已保存到相册');
   }
 }
 

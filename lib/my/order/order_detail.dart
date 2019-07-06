@@ -1,18 +1,56 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shop/api/api.dart';
 import 'package:shop/category/product/product_detail.dart';
 import 'package:shop/common/common.dart';
+import 'package:shop/common/notification.dart';
 import 'package:shop/common/touch_callback.dart';
+import 'package:shop/models/order_detail_model.dart';
+import 'package:http/http.dart' as http;
+import 'package:shop/utils/token.dart';
 
 import 'express_detail.dart';
 
 class OrderDetail extends StatefulWidget {
+
+  OrderDetail({@required this.orderId});
+
+  int orderId;
+
   @override
   _OrderDetailState createState() => _OrderDetailState();
 }
 
 class _OrderDetailState extends State<OrderDetail> {
 
-  Widget _buildProductItem(){
+  OrderDetailModel orderDetailModel;
+  bool _isLoading = true;
+
+  @override
+  initState(){
+    super.initState();
+    _getOrderDetail();
+  }
+
+  _getOrderDetail()async{
+    String token = await getToken();
+    http.get(api_prefix + '/orders/${widget.orderId}',headers: {
+      'Authorization':'Bearer $token'
+    }).then((res){
+      OrderDetailModel _orderDetailModel = OrderDetailModel.fromJson(json.decode(res.body));
+      if(_orderDetailModel.errcode != 0){
+        showToast(context,_orderDetailModel.errmsg);
+      }else{
+        setState(() {
+          orderDetailModel = _orderDetailModel;
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  Widget _buildProductItem(SpecificationSnapshot ss){
     return GestureDetector(
       child: Container(
         padding: EdgeInsets.all(10),
@@ -25,15 +63,22 @@ class _OrderDetailState extends State<OrderDetail> {
               child: Row(
                 children: <Widget>[
                   CircleAvatar(
-                    backgroundImage: AssetImage('images/banners/shoes.jpeg'),
+                    backgroundImage: NetworkImage(ss.imageCover,),
                   ),
                   Container(
-                    margin: EdgeInsets.only(left: 20),
+                    margin: EdgeInsets.only(left: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text('一字鲜麻辣龙虾尾虾球2盒装'),
-                        Text('规格：麻辣味')
+                        Container(
+                          child: Text(ss.longTitle,
+                            softWrap: true,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          width: MediaQuery.of(context).size.width - 160,
+                        ),
+                        Text('规格：${ss.specificationString}')
                       ],
                     ),
                   )
@@ -43,11 +88,11 @@ class _OrderDetailState extends State<OrderDetail> {
             Column(
               children: <Widget>[
                 Container(
-                  padding: EdgeInsets.all(10),
-                  child: Text('\$39.90'),
+                  padding: EdgeInsets.symmetric(horizontal: 2,vertical: 10),
+                  child: Text('\￥${ss.price}'),
                 ),
                 Container(
-                  child: Text('*1',style: TextStyle(
+                  child: Text('*${ss.number}',style: TextStyle(
                       color: Colors.grey.withOpacity(0.5)
                   ),),
                 )
@@ -59,8 +104,62 @@ class _OrderDetailState extends State<OrderDetail> {
       onTap: (){
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context){
-            return ProductDetail();
+            return ProductDetail(ProductId: ss.productId,);
           })
+        );
+      },
+    );
+  }
+
+  Widget _buildExpressItem(Expresses express){
+    return TouchCallback(
+      child: Container(
+        height: 60,
+        padding: EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            express.detail.length != 0 ?
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  child: Text(express.detail[0].status,style: TextStyle(
+                      color: Colors.green
+                  ),),
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 3),
+                  child: Text(express.detail[0].time,style: TextStyle(
+                      color: Colors.grey
+                  ),),
+                )
+              ],
+            ) : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  child: Text('暂无物流信息',style: TextStyle(
+                      color: Colors.green
+                  ),),
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 3),
+                  child: Text(orderDetailModel.data.createdAt,style: TextStyle(
+                      color: Colors.grey
+                  ),),
+                )
+              ],
+            ),
+            Icon(Icons.arrow_forward_ios,size: 18,color: Colors.grey,),
+          ],
+        ),
+      ),
+      onPressed: (){
+        Navigator.of(context).push(
+            MaterialPageRoute(builder: (context){
+              return ExpressDetail(expresses: express,addressSnapshot: orderDetailModel.data.addressSnapshot,);
+            })
         );
       },
     );
@@ -73,7 +172,11 @@ class _OrderDetailState extends State<OrderDetail> {
         title: Text('订单详情'),
         centerTitle: true,
       ),
-      body: ListView(
+      body: _isLoading ? Container(
+        child: Center(
+          child: RefreshProgressIndicator(),
+        ),
+      ) : ListView(
         children: <Widget>[
           Container(
             height: 80,
@@ -87,7 +190,7 @@ class _OrderDetailState extends State<OrderDetail> {
               children: <Widget>[
                 Container(
                   padding: EdgeInsets.all(10),
-                  child: Text('待评价',style: TextStyle(
+                  child: Text(orderDetailModel.data.statusDesc,style: TextStyle(
                     fontSize: 20,
                     color: Colors.white
                   ),),
@@ -95,41 +198,9 @@ class _OrderDetailState extends State<OrderDetail> {
               ],
             ),
           ),
-          TouchCallback(
-            child: Container(
-              height: 60,
-              padding: EdgeInsets.all(10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(
-                        child: Text('已签收，签收人凭取货码签收',style: TextStyle(
-                          color: Colors.green
-                        ),),
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(top: 3),
-                        child: Text('2019-09-20 17:34:09',style: TextStyle(
-                          color: Colors.grey
-                        ),),
-                      )
-                    ],
-                  ),
-                  Icon(Icons.arrow_forward_ios,size: 18,color: Colors.grey,),
-                ],
-              ),
-            ),
-            onPressed: (){
-              Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context){
-                    return ExpressDetail();
-                  })
-              );
-            },
-          ),
+          ...orderDetailModel.data.expresses.map((express){
+            return _buildExpressItem(express);
+          }).toList(),
           Divider(height: 10,),
           Container(
             padding: EdgeInsets.only(top: 10,right: 10,bottom: 10,left: 3),
@@ -141,10 +212,20 @@ class _OrderDetailState extends State<OrderDetail> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
-                      child: Text('帅纯亮  16601126817'),
+                      child: Text(
+                          orderDetailModel.data.addressSnapshot.name + '    '+
+                          orderDetailModel.data.addressSnapshot.phone
+                      ),
                     ),
                     Container(
-                      child: Text('湖北省 武汉市 洪山区 高新二路大鹏村公交站江城雅居'),
+                      width: MediaQuery.of(context).size.width - 50,
+                      child: Text(
+                          orderDetailModel.data.addressSnapshot.province + '  ' +
+                          orderDetailModel.data.addressSnapshot.city + '   ' + 
+                          orderDetailModel.data.addressSnapshot.area + '   ' + 
+                          orderDetailModel.data.addressSnapshot.street,
+                        softWrap: true,maxLines: 2,overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ],
                 )
@@ -156,16 +237,16 @@ class _OrderDetailState extends State<OrderDetail> {
             padding: EdgeInsets.all(10),
             child: Text('商品详情'),
           ),
-          _buildProductItem(),
-          _buildProductItem(),
-          _buildProductItem(),
+          ...orderDetailModel.data.specificationSnapshot.map((SpecificationSnapshot ss){
+            return _buildProductItem(ss);
+          }).toList(),
           Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Container(
                   padding: EdgeInsets.all(10),
-                  child: Text('实付：\$30(免运费)'),
+                  child: Text('实付：\￥${orderDetailModel.data.amount}(运费:￥${orderDetailModel.data.expressFee})'),
                 )
               ],
             ),
@@ -177,27 +258,11 @@ class _OrderDetailState extends State<OrderDetail> {
               children: <Widget>[
                 Container(
                   padding: EdgeInsets.all(10),
-                  child: Text('订单编号：621946120404017'),
+                  child: Text('订单编号：${orderDetailModel.data.orderNo}'),
                 ),
                 Container(
                   padding: EdgeInsets.all(10),
-                  child: Text('支付方式：微信'),
-                ),
-                Container(
-                  padding: EdgeInsets.all(10),
-                  child: Text('下单时间：2019-09-01 12:09:30'),
-                ),
-                Container(
-                  padding: EdgeInsets.all(10),
-                  child: Text('发货时间：2019-09-01 12:10:30'),
-                ),
-                Container(
-                  padding: EdgeInsets.all(10),
-                  child: Text('快递方式：顺丰快递'),
-                ),
-                Container(
-                  padding: EdgeInsets.all(10),
-                  child: Text('运单编号：73582945674853'),
+                  child: Text('下单时间：${orderDetailModel.data.createdAt}'),
                 ),
               ],
             ),

@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shop/api/api.dart';
 import 'package:shop/common/save_image.dart';
 import 'package:shop/common/touch_callback.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-
+import 'package:shop/models/pictures_model.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_drag_scale/flutter_drag_scale.dart';
 
 class StoreInfo extends StatefulWidget {
   @override
@@ -11,8 +15,15 @@ class StoreInfo extends StatefulWidget {
 
 class _StoreInfoState extends State<StoreInfo> {
 
+  List<Data> _pictures = [];
+
   @override
   void initState() {
+    http.get(api_prefix+'/pictures').then((res){
+      setState(() {
+        _pictures = PicturesModel.fromJson(json.decode(res.body)).data;
+      });
+    });
     super.initState();
   }
 
@@ -22,53 +33,32 @@ class _StoreInfoState extends State<StoreInfo> {
       appBar: AppBar(
         title: Text('店长信息'),
       ),
-      body: Center(
+      body: _pictures.length == 0 ? Center(
+        child: RefreshProgressIndicator(),
+      ) : Center(
         child: Container(
           child: PageView(
-            children: <Widget>[
-              TouchCallback(
-                  child: CachedNetworkImage(
-                    imageUrl: "http://via.placeholder.com/350x150",
-                    placeholder: (context,
-                        url) => new CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => new Icon(Icons.error),
+            children: _pictures.map((Data data){
+              return TouchCallback(
+                  child: DragScaleContainer(
+                    doubleTapStillScale: true,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Image.network(data.image),
+                        Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Text(data.title),
+                        )
+                      ],
+                    ),
                   ),
-                  onPressed: () {},
                   onLongPressed: () {
-//                    showDialog(
-//                        context: context,
-//                        builder: (_) =>
-//                            NetworkGiffyDialog(
-//                                image: Image.network(
-//                                    'http://b.hiphotos.baidu.com/image/h%3D300/sign=77d1cd475d43fbf2da2ca023807fca1e/9825bc315c6034a8ef5250cec5134954082376c9.jpg'),
-//                                title: Text('是否保存到相册？',
-//                                    textAlign: TextAlign.center,
-//                                    style: TextStyle(
-//                                        fontSize: 22.0,
-//                                        fontWeight: FontWeight.w600)),
-//                                description: Text(
-//                                  '你的酒馆对我打了烊，请告诉我今后怎么抗，遍体鳞伤，还笑着原谅',
-//                                  textAlign: TextAlign.center,
-//                                ),
-//                                onOkButtonPressed: () {
-//                                  saveNetworkImage(
-//                                    context,
-//                                    'http://b.hiphotos.baidu.com/image/h%3D300/sign=77d1cd475d43fbf2da2ca023807fca1e/9825bc315c6034a8ef5250cec5134954082376c9.jpg',
-//                                  );
-//                                  Navigator.of(context).pop();
-//                                }
-//                            )
-//                    );
+                    saveNetworkImage(context, data.image);
                   }
-              ),
-              Image.network('https://ws1.sinaimg.cn/large/0065oQSqly1fw8wzdua6rj30sg0yc7gp.jpg'),
-              Image.network('https://ws1.sinaimg.cn/large/0065oQSqly1fw0vdlg6xcj30j60mzdk7.jpg'),
-              Image.network('https://ws1.sinaimg.cn/large/0065oQSqly1fuo54a6p0uj30sg0zdqnf.jpg'),
-              Image.network('https://ws1.sinaimg.cn/large/0065oQSqgy1fwgzx8n1syj30sg15h7ew.jpg'),
-            ],
+              );
+            }).toList()
           ),
-//          width: 200,
-//          height: 200,
         ),
       ),
     );

@@ -5,8 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:shop/api/api.dart';
 import 'package:shop/common/common.dart';
 import 'package:flutter_share_me/flutter_share_me.dart';
-import 'package:shop/models/product_detail_model.dart';
+import 'package:shop/common/notification.dart';
+import 'package:shop/models/common_res_model.dart';
+import 'package:shop/models/double_specification_product_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop/models/single_specification_product_model.dart';
+import 'package:shop/utils/token.dart';
+
+import 'order_check.dart';
 
 class ProductDetail extends StatefulWidget {
 
@@ -22,11 +28,14 @@ class _ProductDetailState extends State<ProductDetail> {
 
   int _current = 0;
 
-  ProductDetailModel _productDetailModel;
+  DoubleSpecificationProductModel _doubleSpecificationProductModel;
+  SingleSpecificationProductModel _singleSpecificationProductModel;
   bool _isLoading = true;
-  bool _isChoosing = false;
+  bool _isDoubleSpecification = true;
   int _firstIndex = 0;
   int _secondIndex = 0;
+  int _selectedProductSpecification;
+  int _number = 1;
 
   CarouselSlider getFullScreenCarousel(BuildContext mediaContext) {
     return CarouselSlider(
@@ -35,7 +44,7 @@ class _ProductDetailState extends State<ProductDetail> {
       enableInfiniteScroll: false,
       viewportFraction: 1.0,
       aspectRatio: MediaQuery.of(mediaContext).size.aspectRatio,
-      items: _productDetailModel.data.imgs.map((url) {
+      items: _doubleSpecificationProductModel.data.imgs.map((url) {
           return Container(
             child: ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(0.0)),
@@ -62,15 +71,16 @@ class _ProductDetailState extends State<ProductDetail> {
     http.get(api_prefix + '/products/${widget.ProductId}').then((res){
       setState(() {
         _isLoading = false;
-        _productDetailModel = ProductDetailModel.fromJson(json.decode(res.body));
+        _doubleSpecificationProductModel = DoubleSpecificationProductModel.fromJson(json.decode(res.body));
+        if(_doubleSpecificationProductModel.data.specifications[0].children[0].children == null){
+          _isDoubleSpecification = false;
+          _singleSpecificationProductModel = SingleSpecificationProductModel.fromJson(json.decode(res.body));
+        }
       });
     });
   }
 
   _chooseSpecification(context) {
-    setState(() {
-      _isChoosing = true;
-    });
     showModalBottomSheet(
         context: context,
         builder: (context){
@@ -95,7 +105,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                 borderRadius: BorderRadius.circular(10),
                                 image: DecorationImage(
                                   image: NetworkImage(
-                                      _productDetailModel.data.imageCover),
+                                      _doubleSpecificationProductModel.data.imageCover),
                                   fit: BoxFit.cover,
                                 )
                             ),
@@ -104,17 +114,21 @@ class _ProductDetailState extends State<ProductDetail> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text('￥9.99', style: TextStyle(
+                                Text('￥${_isDoubleSpecification ?
+                                    _doubleSpecificationProductModel.data.specifications[_firstIndex].children[_secondIndex].children[0].price:
+                                _singleSpecificationProductModel.data.specifications[_firstIndex].children[0].price}', style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.redAccent,
                                     fontWeight: FontWeight.w500
                                 ),),
-                                Text('库存209', style: TextStyle(
+                                Text('库存${_isDoubleSpecification ?
+                                _doubleSpecificationProductModel.data.specifications[_firstIndex].children[_secondIndex].children[0].stock:
+                                _singleSpecificationProductModel.data.specifications[_firstIndex].children[0].stock}', style: TextStyle(
                                     color: Colors.grey.withOpacity(0.6)
                                 ),),
-                                Text('已选：' + (_productDetailModel.data.specifications[0].children[0].children != null ?
-                                _productDetailModel.data.specifications[_firstIndex].title + _productDetailModel.data.specifications[_firstIndex].children[_secondIndex].title:
-                                _productDetailModel.data.specifications[_firstIndex].title))
+                                Text('已选：' + (_isDoubleSpecification ?
+                                _doubleSpecificationProductModel.data.specifications[_firstIndex].title + ' ' + _doubleSpecificationProductModel.data.specifications[_firstIndex].children[_secondIndex].title:
+                                _singleSpecificationProductModel.data.specifications[_firstIndex].title))
                               ],
                             ),
                           )
@@ -135,19 +149,26 @@ class _ProductDetailState extends State<ProductDetail> {
                           ),
                           Row(
                             children: <Widget>[
-                              RaisedButton(
-                                child: Icon(Icons.add),
-                                onPressed: (){},
+                              FlatButton(
+                                child: Icon(Icons.remove,size: 20,),
+                                onPressed: (){
+                                  state((){
+                                    if (_number > 1){
+                                      _number--;
+                                    }
+                                  });
+                                },
                               ),
-                              RaisedButton(
-                                child: Text('1'),
-                                onPressed: null,
-                              ),
-                              Container(
-                                child: RaisedButton(
-                                  child: Icon(Icons.add),
-                                  onPressed: (){},
-                                ),
+                              Text(_number.toString()),
+                              FlatButton(
+                                child: Icon(Icons.add,size: 20,),
+                                onPressed: (){
+                                  state((){
+                                    if (_number < 20){
+                                      _number++;
+                                    }
+                                  });
+                                },
                               ),
                             ],
                           ),
@@ -157,72 +178,84 @@ class _ProductDetailState extends State<ProductDetail> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                gradient: LinearGradient(colors: [
-                                  Colors.yellowAccent,
-                                  Colors.orangeAccent
-                                ]),
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(20),
-                                    bottomLeft: Radius.circular(20)
-                                )
+                          GestureDetector(
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(colors: [
+                                    Colors.yellowAccent,
+                                    Colors.orangeAccent
+                                  ]),
+                                  borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(20),
+                                      bottomLeft: Radius.circular(20)
+                                  )
+                              ),
+                              child: Center(
+                                child: Text('加入购物车'),
+                              ),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width / 2,
                             ),
-                            child: Center(
-                              child: Text('加入购物车'),
-                            ),
-                            width: MediaQuery.of(context).size.width/2,
+                            onTap: _addToCart,
                           ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                gradient: LinearGradient(colors: [
-                                  Colors.orange,
-                                  Colors.redAccent
-                                ]),
-                                borderRadius: BorderRadius.only(
-                                    topRight: Radius.circular(20),
-                                    bottomRight: Radius.circular(20)
-                                )
+                          GestureDetector(
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(colors: [
+                                    Colors.orange,
+                                    Colors.redAccent
+                                  ]),
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(20),
+                                      bottomRight: Radius.circular(20)
+                                  )
+                              ),
+                              child: Center(
+                                child: Text('立即购买'),
+                              ),
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width / 2,
                             ),
-                            child: Center(
-                              child: Text('立即购买'),
-                            ),
-                            width: MediaQuery.of(context).size.width/2,
-                          ),
+                            onTap: (){
+                              _toOrderCheck();
+                            },
+                          )
                         ],
-                      )
+                      ),
+
                     ],
                   ),
                 ),
                 onTap: (){
-                  return false;
+                  print('22');
                 },
               );
             },
           );
         }
     ).then((val) {
-      setState(() {
-        _isChoosing = false;
-      });
+
     });
   }
 
   List<Widget> _buildSpecification(state){
-    if (_productDetailModel.data.specifications[0].children[0].children != null){
-      print('两级');
+    if (_isDoubleSpecification){
       return [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Text(_productDetailModel.data.specifications[0].rootTitle),
+          child: Text(_doubleSpecificationProductModel.data.specifications[0].rootTitle),
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Wrap(
             spacing: 10,
-            children: _productDetailModel.data.specifications.asMap().map((i,Specifications item){
+            children: _doubleSpecificationProductModel.data.specifications.asMap().map((i,DoubleSpecifications item){
               return MapEntry(i,GestureDetector(
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 2,horizontal: 5),
@@ -237,9 +270,11 @@ class _ProductDetailState extends State<ProductDetail> {
                 onTap: (){
                   state(() {
                     _firstIndex = i;
-                    if(_productDetailModel.data.specifications[_firstIndex].children.length <= _secondIndex){
+                    if(_doubleSpecificationProductModel.data.specifications[_firstIndex].children.length <= _secondIndex){
                       _secondIndex = 0;
                     }
+                    _selectedProductSpecification = _doubleSpecificationProductModel.data.specifications[_firstIndex]
+                    .children[_secondIndex].children[0].id;
                   });
                 },
               ));
@@ -249,13 +284,13 @@ class _ProductDetailState extends State<ProductDetail> {
         Divider(),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Text(_productDetailModel.data.specifications[0].children[0].rootTitle),
+          child: Text(_doubleSpecificationProductModel.data.specifications[0].children[0].rootTitle),
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Wrap(
               spacing: 10,
-              children: _productDetailModel.data.specifications[_firstIndex].children.asMap().map((i,FirstChildren item){
+              children: _doubleSpecificationProductModel.data.specifications[_firstIndex].children.asMap().map((i,FirstChildren item){
                 return MapEntry(i,GestureDetector(
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 2,horizontal: 5),
@@ -278,17 +313,16 @@ class _ProductDetailState extends State<ProductDetail> {
         ),
       ];
     }else{
-      print('一级');
       return [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Text(_productDetailModel.data.specifications[0].rootTitle),
+          child: Text(_singleSpecificationProductModel.data.specifications[0].rootTitle),
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Wrap(
               spacing: 10,
-              children: _productDetailModel.data.specifications.asMap().map((i, Specifications item) {
+              children: _singleSpecificationProductModel.data.specifications.asMap().map((i, SingleSpecifications item) {
                 return MapEntry(i,GestureDetector(
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
@@ -303,6 +337,8 @@ class _ProductDetailState extends State<ProductDetail> {
                   onTap: (){
                     state(() {
                       _firstIndex = i;
+                      _selectedProductSpecification = _singleSpecificationProductModel.data.specifications[_firstIndex]
+                      .children[0].id;
                     });
                   },
                 ));
@@ -313,6 +349,30 @@ class _ProductDetailState extends State<ProductDetail> {
     }
   }
 
+  _addToCart()async{
+    String token = await getToken();
+    http.post(api_prefix + '/user/shopping_carts',body: {
+      'product_specification_id':_selectedProductSpecification.toString(),
+      'number':_number.toString()
+    },headers: {
+      'Authorization':'Bearer ' + token
+    }).then((res){
+      CommonResModel commonResModel = CommonResModel.fromJson(json.decode(res.body));
+      if(commonResModel.errcode != 0){
+        showToast(context,commonResModel.errmsg);
+      }else{
+        showToast(context,'成功加入购物车');
+      }
+    });
+    Navigator.of(context).pop();
+  }
+
+  _toOrderCheck(){
+    Navigator.of(context).push(MaterialPageRoute(builder: (context){
+      return OrderCheck(ProductSpecificationId: _selectedProductSpecification,);
+    }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -320,470 +380,6 @@ class _ProductDetailState extends State<ProductDetail> {
         title: Text('商品详情'),
       ),
       body: _isLoading ? Container() : Builder(builder: (context){
-        if (_isChoosing){
-          return Opacity(
-            opacity: 0.6,
-            child: Container(
-              child: Stack(
-                children: <Widget>[
-                  ListView(
-                    children: <Widget>[
-                      Stack(
-                        alignment: Alignment.topLeft,
-                        children: <Widget>[
-                          getFullScreenCarousel(context),
-                          Positioned(
-                              top: 230.0,
-                              right: 20.0,
-                              child: Chip(
-                                  backgroundColor: Colors.grey[600].withOpacity(0.1),
-                                  label: Text('${_current+1}/${_productDetailModel.data.imgs.length}')
-                              )
-                          ),
-                          Positioned(
-                            child: IconButton(
-                              icon: Icon(Icons.share),
-                              onPressed: ()async{
-                                print(111);
-                                var response =
-                                await FlutterShareMe().shareToSystem(msg: 'Hello Flutter');
-                                if (response == 'success') {
-                                  print('navigate success');
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: Text(
-                                _productDetailModel.data.longTitle,
-                                softWrap: true,
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.black54
-                                ),
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(left: 10),
-                              child: Column(
-                                children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-                                      Text('售价：',style: TextStyle(
-                                          fontSize: 10
-                                      ),),
-                                      Text('\￥${_productDetailModel.data.price}',style: TextStyle(
-                                          fontSize: 18,
-                                          color: Colors.redAccent
-                                      ),)
-                                    ],
-                                  ),
-                                  Row(
-                                    children: <Widget>[
-                                      Text('库存 ${_productDetailModel.data.stock}',style: TextStyle(
-                                          fontSize: 10
-                                      ),),
-                                      SizedBox(width: 10,),
-                                      Text('销量 ${_productDetailModel.data.sales}',style: TextStyle(
-                                        fontSize: 10,
-
-                                      ),)
-                                    ],
-                                  )
-
-
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      commonDivider(),
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                  children: <Widget>[
-                                    Text('发货',style: TextStyle(
-                                        color: Colors.grey
-                                    ),),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 20),
-                                      child: Row(
-                                        children: <Widget>[
-                                          Icon(Icons.location_on,color: Colors.transparent.withOpacity(0.5),),
-                                          Text(_productDetailModel.data.location),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 20),
-                                      child: Text('快递:${_productDetailModel.data.expressFee}'),
-                                    )
-                                  ],
-                                ),
-                                Text('月销 ${_productDetailModel.data.monthSales}'),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Row(
-                                  children: <Widget>[
-                                    Text('优惠',style: TextStyle(
-                                        color: Colors.grey
-                                    ),),
-                                    Container(
-                                      padding: EdgeInsets.all(10),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: <Widget>[
-//                                      Row(
-//                                        children: <Widget>[
-//                                          Container(
-//                                            child: Text('活动直降', style: TextStyle(
-//                                                color: Colors.deepOrange,
-//                                                fontSize: 8
-//                                            ),),
-//                                            decoration: BoxDecoration(
-//                                                border: Border.all(
-//                                                    width: 1,
-//                                                    color: Colors.orangeAccent.withOpacity(0.1)
-//                                                ),
-//                                                borderRadius: BorderRadius.all(Radius.circular(20)),
-//                                                color: Colors.deepOrange.withOpacity(0.1)
-//                                            ),
-//                                          ),
-//                                          Container(
-//                                            padding: EdgeInsets.all(10),
-//                                            child: Text('\$5',style: TextStyle(
-//                                                color: Colors.redAccent
-//                                            ),),
-//                                          )
-//                                        ],
-//                                      ),
-                                          Row(
-                                            children: <Widget>[
-                                              Container(
-                                                child: Text('积分奖励', style: TextStyle(
-                                                    color: Colors.deepOrange,
-                                                    fontSize: 8
-                                                ),),
-                                                decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        width: 1,
-                                                        color: Colors.orangeAccent.withOpacity(0.1)
-                                                    ),
-                                                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                                                    color: Colors.deepOrange.withOpacity(0.1)
-                                                ),
-                                              ),
-                                              Container(
-                                                padding: EdgeInsets.all(10),
-                                                child: Text('购买可得${_productDetailModel.data.points}积分'),
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-//                            Container(
-//                              padding: EdgeInsets.all(10),
-//                              child: Row(
-//                                children: <Widget>[
-//                                  Text('查看活动'),
-//                                  Icon(Icons.arrow_forward_ios)
-//                                ],
-//                              ),
-//                            )
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                      commonDivider(),
-                      Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Container(
-                              padding: EdgeInsets.all(10),
-                              child: Row(
-                                children: <Widget>[
-                                  Text('保障',style: TextStyle(
-                                      color: Colors.grey
-                                  ),),
-                                  Container(
-                                    margin: EdgeInsets.only(left: 30),
-                                    child: Text(_productDetailModel.data.guarantee),
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      commonDivider(),
-                      GestureDetector(
-                        child: Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                child: Row(
-                                  children: <Widget>[
-                                    Text('选择',style: TextStyle(
-                                        color: Colors.grey
-                                    ),),
-                                    Container(
-                                      margin: EdgeInsets.only(left: 30),
-                                      child: Text('选择规格'),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.only(right: 10),
-                                child: Icon(Icons.arrow_forward_ios),
-                              ),
-                            ],
-                          ),
-                        ),
-                        onTap: (){
-                          return _chooseSpecification(context);
-                        },
-                      ),
-                      commonDivider(),
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                              margin: EdgeInsets.only(bottom: 10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text('宝贝评价(5)'),
-                                  GestureDetector(
-                                    child: Row(
-                                      children: <Widget>[
-                                        Text('查看全部'),
-                                        Icon(Icons.arrow_forward_ios)
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Row(
-                              children: <Widget>[
-                                Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    children: <Widget>[
-                                      Row(
-                                        children: <Widget>[
-                                          CircleAvatar(
-                                            backgroundImage: AssetImage('images/banners/xiezi.jpeg'),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(left: 10),
-                                            child: Text('张三'),
-                                          )
-                                        ],
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: Text('产品非常好'),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: <Widget>[
-                                Container(
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    children: <Widget>[
-                                      Row(
-                                        children: <Widget>[
-                                          CircleAvatar(
-                                            backgroundImage: AssetImage('images/banners/xiezi.jpeg'),
-                                          ),
-                                          Container(
-                                            margin: EdgeInsets.only(left: 10),
-                                            child: Text('张三'),
-                                          )
-                                        ],
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.all(10),
-                                        child: Text('产品非常好'),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      commonDivider(),
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: Text('宝贝详情'),
-                      ),
-                      Column(
-                        children: _productDetailModel.data.details.map((url){
-                          return Image.network(url);
-                        }).toList(),
-                      ),
-                      commonDivider(),
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: Text('相关推荐'),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        child: GridView.count(
-                          physics: new NeverScrollableScrollPhysics(),
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          children: <Widget>[
-                            Container(
-                              height: 100,
-                              color: Colors.redAccent,
-                            ),
-                            Container(
-                              height: 100,
-                              color: Colors.blueGrey,
-                            ),
-                            Container(
-                              height: 100,
-                              color: Colors.pink,
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                  Positioned(
-                      bottom: 0,
-                      left: 0,
-                      child: Container(
-                        height: 60,
-                        width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border(
-                                top: BorderSide(color: Colors.grey)
-                            )
-                        ),
-                        padding: EdgeInsets.only(left: 10,right: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                            Container(
-                              padding: EdgeInsets.only(top: 10),
-                              child: Row(
-                                children: <Widget>[
-                                  Column(
-                                    children: <Widget>[
-                                      Icon(Icons.menu),
-                                      Text('客服')
-                                    ],
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.symmetric(horizontal: 30),
-                                    child: Column(
-                                      children: <Widget>[
-                                        Icon(Icons.star_border),
-                                        Text('收藏')
-                                      ],
-                                    ),
-                                  ),
-                                  Column(
-                                    children: <Widget>[
-                                      Icon(Icons.add_shopping_cart),
-                                      Text('购物车')
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Container(
-                              padding: EdgeInsets.only(top: 10,left: 10,bottom: 10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Container(
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(colors: [
-                                          Colors.yellowAccent,
-                                          Colors.orangeAccent
-                                        ]),
-                                        borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(20),
-                                            bottomLeft: Radius.circular(20)
-                                        )
-                                    ),
-                                    child: Center(
-                                      child: Text('加入购物车'),
-                                    ),
-                                    width: 100,
-                                  ),
-                                  Container(
-                                    padding: EdgeInsets.all(10),
-                                    decoration: BoxDecoration(
-                                        gradient: LinearGradient(colors: [
-                                          Colors.orange,
-                                          Colors.redAccent
-                                        ]),
-                                        borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(20),
-                                            bottomRight: Radius.circular(20)
-                                        )
-                                    ),
-                                    child: Center(
-                                      child: Text('立即购买'),
-                                    ),
-                                    width: 100,
-                                  ),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      )
-                  )
-                ],
-              ),
-            ),
-          );
-        }else{
           return Container(
             child: Stack(
               children: <Widget>[
@@ -798,7 +394,7 @@ class _ProductDetailState extends State<ProductDetail> {
                             right: 20.0,
                             child: Chip(
                                 backgroundColor: Colors.grey[600].withOpacity(0.1),
-                                label: Text('${_current+1}/${_productDetailModel.data.imgs.length}')
+                                label: Text('${_current+1}/${_doubleSpecificationProductModel.data.imgs.length}')
                             )
                         ),
                         Positioned(
@@ -807,7 +403,10 @@ class _ProductDetailState extends State<ProductDetail> {
                             onPressed: ()async{
                               print(111);
                               var response =
-                              await FlutterShareMe().shareToSystem(msg: 'Hello Flutter');
+                              await FlutterShareMe().shareToSystem(
+                                  msg: '我在一个小店发现了一件好宝贝，分享给你也看看：'+
+                              _doubleSpecificationProductModel.data.longTitle +
+                                  _doubleSpecificationProductModel.data.imageCover);
                               if (response == 'success') {
                                 print('navigate success');
                               }
@@ -822,7 +421,7 @@ class _ProductDetailState extends State<ProductDetail> {
                         children: <Widget>[
                           Expanded(
                             child: Text(
-                              _productDetailModel.data.longTitle,
+                              _doubleSpecificationProductModel.data.longTitle,
                               softWrap: true,
                               style: TextStyle(
                                   fontSize: 18,
@@ -840,7 +439,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                     Text('售价：',style: TextStyle(
                                         fontSize: 10
                                     ),),
-                                    Text('\￥${_productDetailModel.data.price}',style: TextStyle(
+                                    Text('\￥${_doubleSpecificationProductModel.data.price}',style: TextStyle(
                                         fontSize: 18,
                                         color: Colors.redAccent
                                     ),)
@@ -848,11 +447,11 @@ class _ProductDetailState extends State<ProductDetail> {
                                 ),
                                 Row(
                                   children: <Widget>[
-                                    Text('库存 ${_productDetailModel.data.stock}',style: TextStyle(
+                                    Text('库存 ${_doubleSpecificationProductModel.data.stock}',style: TextStyle(
                                         fontSize: 10
                                     ),),
                                     SizedBox(width: 10,),
-                                    Text('销量 ${_productDetailModel.data.sales}',style: TextStyle(
+                                    Text('销量 ${_doubleSpecificationProductModel.data.sales}',style: TextStyle(
                                       fontSize: 10,
 
                                     ),)
@@ -885,17 +484,17 @@ class _ProductDetailState extends State<ProductDetail> {
                                     child: Row(
                                       children: <Widget>[
                                         Icon(Icons.location_on,color: Colors.transparent.withOpacity(0.5),),
-                                        Text(_productDetailModel.data.location),
+                                        Text(_doubleSpecificationProductModel.data.location),
                                       ],
                                     ),
                                   ),
                                   Container(
                                     margin: EdgeInsets.only(left: 20),
-                                    child: Text('快递:${_productDetailModel.data.expressFee}'),
+                                    child: Text('快递:${_doubleSpecificationProductModel.data.expressFee}'),
                                   )
                                 ],
                               ),
-                              Text('月销 ${_productDetailModel.data.monthSales}'),
+                              Text('月销 ${_doubleSpecificationProductModel.data.monthSales}'),
                             ],
                           ),
                           Row(
@@ -953,7 +552,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                             ),
                                             Container(
                                               padding: EdgeInsets.all(10),
-                                              child: Text('购买可得${_productDetailModel.data.points}积分'),
+                                              child: Text('购买可得${_doubleSpecificationProductModel.data.points}积分'),
                                             )
                                           ],
                                         ),
@@ -990,7 +589,7 @@ class _ProductDetailState extends State<ProductDetail> {
                                 ),),
                                 Container(
                                   margin: EdgeInsets.only(left: 30),
-                                  child: Text(_productDetailModel.data.guarantee),
+                                  child: Text(_doubleSpecificationProductModel.data.guarantee),
                                 ),
                               ],
                             ),
@@ -1013,7 +612,9 @@ class _ProductDetailState extends State<ProductDetail> {
                                   ),),
                                   Container(
                                     margin: EdgeInsets.only(left: 30),
-                                    child: Text('选择规格'),
+                                    child: Text(_isDoubleSpecification ?
+                                    _doubleSpecificationProductModel.data.specifications[_firstIndex].title + ' ' + _doubleSpecificationProductModel.data.specifications[_firstIndex].children[_secondIndex].title:
+                                    _singleSpecificationProductModel.data.specifications[_firstIndex].title),
                                   ),
                                 ],
                               ),
@@ -1112,7 +713,7 @@ class _ProductDetailState extends State<ProductDetail> {
                       child: Text('宝贝详情'),
                     ),
                     Column(
-                      children: _productDetailModel.data.details.map((url){
+                      children: _doubleSpecificationProductModel.data.details.map((url){
                         return Image.network(url);
                       }).toList(),
                     ),
@@ -1182,12 +783,19 @@ class _ProductDetailState extends State<ProductDetail> {
                                     ],
                                   ),
                                 ),
-                                Column(
-                                  children: <Widget>[
-                                    Icon(Icons.add_shopping_cart),
-                                    Text('购物车')
-                                  ],
-                                ),
+                                GestureDetector(
+                                  child: Column(
+                                    children: <Widget>[
+                                      Icon(Icons.add_shopping_cart,color: Colors.redAccent,),
+                                      Text('购物车',style: TextStyle(
+                                          color: Colors.redAccent
+                                      ),)
+                                    ],
+                                  ),
+                                  onTap: (){
+                                    Navigator.of(context).pushNamed('/cart');
+                                  },
+                                )
                               ],
                             ),
                           ),
@@ -1243,7 +851,6 @@ class _ProductDetailState extends State<ProductDetail> {
               ],
             ),
           );
-        }
       })
     );
   }

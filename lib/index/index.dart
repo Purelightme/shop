@@ -10,6 +10,7 @@ import 'package:shop/category/product/product_list.dart';
 import 'package:shop/common/common.dart';
 import 'package:shop/models/banner_model.dart' as bm;
 import 'package:shop/models/index_category.dart' as ic;
+import 'package:shop/models/hot_product_model.dart' as hp;
 
 class Index extends StatefulWidget {
   @override
@@ -19,6 +20,8 @@ class Index extends StatefulWidget {
 class _indexState extends State<Index> {
 
   bm.BannerModel _bannerModel;
+
+  List<hp.Data> _hots = [];
 
   List<int> items = [0,1,2,3,4,5,6,7,8,9];
 
@@ -37,7 +40,7 @@ class _indexState extends State<Index> {
   ScrollController _scrollController = new ScrollController();
   TextEditingController _controller = new TextEditingController();
 
-  Widget _buildHotItem(index){
+  Widget _buildHotItem(hp.Data data) {
     return Container(
       width: 180,
       margin: EdgeInsets.only(right: 5),
@@ -46,23 +49,31 @@ class _indexState extends State<Index> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Image.asset('images/banners/shoes.jpeg',fit: BoxFit.cover,),
+              Image.network(data.imageCover, fit: BoxFit.cover,),
               Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.all(1),
-                    child: Text('商品标题这是标题商品标题这是标题商品题$index',
-                      softWrap: true,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  child: GestureDetector(
+                    child: Padding(
+                      padding: EdgeInsets.all(1),
+                      child: Text(data.shortTitle,
+                        softWrap: true,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    onTap: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) {
+                            return ProductDetail(ProductId: data.id,);
+                          }));
+                    },
                   )
-                ),
+              ),
             ],
           ),
         ),
-        onTap: (){
+        onTap: () {
           Navigator.of(context).push(
-              MaterialPageRoute(builder: (context){
+              MaterialPageRoute(builder: (context) {
                 return ProductDetail(ProductId: 1,);
               })
           );
@@ -241,7 +252,7 @@ class _indexState extends State<Index> {
     return GestureDetector(
       child: Column(
         children: <Widget>[
-          cachedImage(data.imageCover, context),
+          Image.network(data.imageCover),
           Text(data.title)
         ],
       ),
@@ -262,7 +273,7 @@ class _indexState extends State<Index> {
         margin: EdgeInsets.symmetric(horizontal: 5.0),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        child: cachedImage(data.imageCover,context),
+        child: Image.network(data.imageCover),
       ),
       onTap: (){
         if(data.productId != null){
@@ -325,6 +336,13 @@ class _indexState extends State<Index> {
     .then((res){
       setState(() {
         _indexCategory = ic.IndexCategory.fromJson(json.decode(res.body));
+      });
+    });
+    //获取热门商品
+    http.get(api_prefix+'/product/hots')
+    .then((res){
+      setState(() {
+        _hots = hp.HotProductModel.fromJson(json.decode(res.body)).data;
       });
     });
     super.initState();
@@ -406,14 +424,15 @@ class _indexState extends State<Index> {
               ),
             ],
           ),
+          _hots.length > 0 ?
           Container(
             padding: EdgeInsets.all(1.0),
-            height: 180,
+            height: 190,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              children: hots.map((index) => _buildHotItem(index)).toList()
+              children: _hots.map((data) => _buildHotItem(data)).toList()
             ),
-          ),
+          ) : Container(),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[

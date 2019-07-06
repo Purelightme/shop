@@ -4,18 +4,79 @@ import 'package:shop/common/canvas/circle.dart';
 import 'package:shop/common/canvas/selected_circle.dart';
 import 'package:shop/common/common.dart';
 import 'package:clipboard_manager/clipboard_manager.dart';
+import 'package:shop/models/order_detail_model.dart';
 import 'package:shop/utils/copy_clipboard.dart';
 
 import 'package:shop/common/canvas/line.dart';
 
 
 class ExpressDetail extends StatefulWidget {
+
+  ExpressDetail({@required this.expresses,@required this.addressSnapshot});
+
+  Expresses expresses;
+  AddressSnapshot addressSnapshot;
+
   @override
   _ExpressDetailState createState() => _ExpressDetailState();
 }
 
 class _ExpressDetailState extends State<ExpressDetail> {
 
+  Widget _buildDetailItem(Detail detail){
+    return Column(
+      children: <Widget>[
+        Container(
+          height: 60,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: MediaQuery.of(context).size.width - 50,
+                child: Text(detail.status,style: TextStyle(
+                    color: Colors.green
+                ),maxLines: 2,softWrap: true,overflow: TextOverflow.ellipsis,),
+              ),
+              Text(detail.time,style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey
+              ),)
+            ],
+          ),
+        ),
+        Divider(height: 5,),
+      ],
+    );
+  }
+
+  Widget _buildLeftItem(int index){
+    if(index == 0){
+      return Column(
+        children: <Widget>[
+          CustomPaint(
+            painter: SelectedCircle(center: Offset(20, 10), radius: 8),
+          ),
+          CustomPaint(
+            painter: Arc(center: Offset(20,10),radius: 3),
+          ),
+          CustomPaint(
+            painter: Line(start: Offset(20,18),end: Offset(20, 80)),
+          ),
+        ],
+      );
+    }else{
+      return Column(
+        children: <Widget>[
+          CustomPaint(
+            painter: Arc(center: Offset(20,15 + index.toDouble()*65),radius: 6),
+          ),
+          CustomPaint(
+            painter: Line(start: Offset(20,15 + index.toDouble()*65),end: Offset(20, 80 + index.toDouble()*65)),
+          ),
+        ],
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +87,16 @@ class _ExpressDetailState extends State<ExpressDetail> {
       body: ListView(
         children: <Widget>[
           Container(
-            height: 100,
+            height: 120,
             padding: EdgeInsets.all(10),
             child: Row(
               children: <Widget>[
-                Image.asset('images/banners/shoes.jpeg',width: 80,height: 80,),
+                Image.network(widget.expresses.productSpecifications[0].imageCover,width: 80,height: 80,),
                 Expanded(
                   child: Container(
                     margin: EdgeInsets.only(left: 10),
-                    child: Text('配送至：湖北省 武汉市 洪山区 江城雅居T2江城雅居T2',style: TextStyle(
+                    child: Text('配送至：${widget.addressSnapshot.province} ${widget.addressSnapshot.city}'
+                        ' ${widget.addressSnapshot.area} ${widget.addressSnapshot.street} \n该包裹共含${widget.expresses.productSpecifications.length}件商品',style: TextStyle(
                         fontSize: 16
                     ),maxLines: 10,softWrap: true,),
                   ),
@@ -53,12 +115,12 @@ class _ExpressDetailState extends State<ExpressDetail> {
                     Text('物流公司：',style: TextStyle(
                         color: Colors.black.withOpacity(0.6)
                     ),),
-                    Text('顺丰快递',)
+                    Text(widget.expresses.type,)
                   ],
                 ),
                 Row(
                   children: <Widget>[
-                    Text('物流单号：23867654235096',style: TextStyle(
+                    Text('物流单号：${widget.expresses.expressNo}',style: TextStyle(
                         color: Colors.black.withOpacity(0.6)
                     ),),
                     GestureDetector(
@@ -76,7 +138,7 @@ class _ExpressDetailState extends State<ExpressDetail> {
                           fontSize: 9
                         ),),
                       ),
-                      onTap: ()=>copyClipboard(context,'测试复制文本')
+                      onTap: ()=>copyClipboard(context,widget.expresses.expressNo)
                     )
                   ],
                 )
@@ -89,151 +151,17 @@ class _ExpressDetailState extends State<ExpressDetail> {
               children: <Widget>[
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    CustomPaint(
-                      painter: SelectedCircle(center: Offset(20, 10), radius: 5),
-                    ),
-                    CustomPaint(
-                      painter: Arc(center: Offset(20,10),radius: 6),
-                    ),
-                    CustomPaint(
-                      painter: Line(start: Offset(20,20),end: Offset(20, 80)),
-                    ),
-                    CustomPaint(
-                      painter: Circle(center: Offset(20, 90),radius: 5),
-                    ),
-                    CustomPaint(
-                      painter: Line(start: Offset(20,100),end: Offset(20, 160)),
-                    ),
-                    CustomPaint(
-                      painter: Circle(center: Offset(20, 170),radius: 5),
-                    ),
-                    CustomPaint(
-                      painter: Line(start: Offset(20,180),end: Offset(20, 240)),
-                    ),
-                  ],
+                  children: widget.expresses.detail.asMap().map((index,detail){
+                    return new MapEntry(index,_buildLeftItem(index));
+                  }).values.toList(),
                 ),
                 Container(
                   margin: EdgeInsets.only(left: 40),
                   width: MediaQuery.of(context).size.width - 40,
                   child: Column(
-                    children: <Widget>[
-                      Container(
-                        height: 80,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('签收'),
-                            Container(
-                              width: MediaQuery.of(context).size.width - 50,
-                              child: Text('已签收，签收人凭取货码签收,已签收，签收人凭取货码签收,已签收，签收人凭取货码签收',style: TextStyle(
-                                  color: Colors.green
-                              ),maxLines: 3,softWrap: true,),
-                            ),
-                            Text('2019-09-08 18:00:09',style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey
-                            ),)
-                          ],
-                        ),
-                      ),
-                      Divider(),
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('签收'),
-                            Container(
-                              width: MediaQuery.of(context).size.width - 50,
-                              child: Text('已签收，签收人凭取货码签收,已签收，签收人凭取货码签收,已签收，签收人凭取货码签收',style: TextStyle(
-                                  color: Colors.green
-                              ),maxLines: 3,softWrap: true,),
-                            ),
-                            Text('2019-09-08 18:00:09',style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey
-                            ),)
-                          ],
-                        ),
-                      ),
-                      Divider(),
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('签收'),
-                            Container(
-                              width: MediaQuery.of(context).size.width - 50,
-                              child: Text('已签收，签收人凭取货码签收.',style: TextStyle(
-                                  color: Colors.green
-                              ),maxLines: 3,softWrap: true,),
-                            ),
-                            Text('2019-09-08 18:00:09',style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey
-                            ),)
-                          ],
-                        ),
-                      ),
-                      Divider(),
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('签收'),
-                            Container(
-                              width: MediaQuery.of(context).size.width - 50,
-                              child: Text('已签收，签收人凭取货码签收,已签收，签收人凭取货码签收,已签收，签收人凭取货码签收',style: TextStyle(
-                                  color: Colors.green
-                              ),maxLines: 3,softWrap: true,),
-                            ),
-                            Text('2019-09-08 18:00:09',style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey
-                            ),)
-                          ],
-                        ),
-                      ),
-                      Divider(),
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('签收'),
-                            Container(
-                              width: MediaQuery.of(context).size.width - 50,
-                              child: Text('已签收，签收人凭取货码签收,已签收，签收人凭取货码签收,已签收，签收人凭取货码签收',style: TextStyle(
-                                  color: Colors.green
-                              ),maxLines: 3,softWrap: true,),
-                            ),
-                            Text('2019-09-08 18:00:09',style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey
-                            ),)
-                          ],
-                        ),
-                      ),
-                      Divider(),
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('签收'),
-                            Container(
-                              width: MediaQuery.of(context).size.width - 50,
-                              child: Text('已签收，签收人凭取货码签收,已签收，签收人凭取货码签收,已签收，签收人凭取货码签收',style: TextStyle(
-                                  color: Colors.green
-                              ),maxLines: 3,softWrap: true,),
-                            ),
-                            Text('2019-09-08 18:00:09',style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey
-                            ),)
-                          ],
-                        ),
-                      ),
-                      Divider(),
-                    ],
+                    children: widget.expresses.detail.map((Detail detail){
+                      return _buildDetailItem(detail);
+                    }).toList()
                   ),
                 ),
               ],

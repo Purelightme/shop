@@ -1,23 +1,29 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:city_pickers/city_pickers.dart';
+import 'package:city_pickers/modal/result.dart';
+import 'package:flutter/material.dart';
 import 'package:shop/api/api.dart';
 import 'package:shop/common/notification.dart';
 import 'package:shop/common/provinces.dart';
-import 'package:http/http.dart' as http;
+import 'package:shop/models/address_model.dart';
 import 'package:shop/models/common_res_model.dart';
 import 'package:shop/utils/token.dart';
+import 'package:http/http.dart' as http;
 
+class UpdateAddress extends StatefulWidget {
 
-class AddAddress extends StatefulWidget {
+  UpdateAddress({@required this.item});
+
+  Data item;
+
   @override
-  _AddAddressState createState() => _AddAddressState();
+  _UpdateAddressState createState() => _UpdateAddressState();
 }
 
-class _AddAddressState extends State<AddAddress> {
+class _UpdateAddressState extends State<UpdateAddress> {
 
-  GlobalKey<FormState> addAddressKey = new GlobalKey<FormState>();
+  GlobalKey<FormState> updateAddressKey = new GlobalKey<FormState>();
 
   String province;
   String city;
@@ -27,14 +33,28 @@ class _AddAddressState extends State<AddAddress> {
   String name;
   String phone;
 
-  _addAddress()async{
-    var addForm = addAddressKey.currentState;
-    if (addForm.validate()){
-      addForm.save();
+  @override
+  void initState(){
+    super.initState();
+    _setInit();
+  }
+
+  _setInit(){
+    setState(() {
+      province = widget.item.province;
+      city = widget.item.city;
+      area = widget.item.area;
+      locationCode = widget.item.areaId;
+    });
+  }
+
+  _updateAddress()async{
+    var updateForm = updateAddressKey.currentState;
+    if (updateForm.validate()){
+      updateForm.save();
       String token = await getToken();
-      http.post(api_prefix + '/addresses',headers: {
-        'Authorization':'Bearer $token',
-        'X-Requested-With':'XMLHttpRequest'
+      http.put(api_prefix + '/addresses/${widget.item.id}',headers: {
+        'Authorization':'Bearer $token'
       },body: {
         'province':province,
         'city':city,
@@ -44,22 +64,25 @@ class _AddAddressState extends State<AddAddress> {
         'name':name,
         'phone':phone
       }).then((res){
-        CommonResModel commonResModel = CommonResModel.fromJson(json.decode(res.body));
-        if(commonResModel.errcode != 0){
-          showToast(context,commonResModel.errmsg);
-        }else{
-          showToast(context, commonResModel.errmsg);
-          Navigator.of(context).pushReplacementNamed('/receive_address');
-        }
+        setState(() {
+          CommonResModel commonResModel = CommonResModel.fromJson(json.decode(res.body));
+          if(commonResModel.errcode != 0){
+            showToast(context, commonResModel.errmsg);
+          }else{
+            showToast(context, commonResModel.errmsg);
+            Navigator.of(context).pushReplacementNamed('/receive_address');
+          }
+        });
       });
     }
+
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('添加收货地址'),
+        title: Text('编辑收货地址'),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -67,7 +90,7 @@ class _AddAddressState extends State<AddAddress> {
           Container(
             padding: EdgeInsets.all(16.0),
             child: Form(
-              key: addAddressKey,
+              key: updateAddressKey,
               child: Column(
                 children: <Widget>[
                   Row(
@@ -85,7 +108,7 @@ class _AddAddressState extends State<AddAddress> {
                         onPressed: () async {
                           Result result = await CityPickers.showCityPicker(
                               context: context,
-                              locationCode: locationCode,
+                              locationCode: widget.item.areaId,
                               provincesData: provincesData
                           );
                           print(result);
@@ -102,8 +125,9 @@ class _AddAddressState extends State<AddAddress> {
                     ],
                   ),
                   TextFormField(
+                    initialValue: widget.item.street,
                     decoration: InputDecoration(
-                        labelText: '街道详细地址'
+                      labelText: '街道详细地址',
                     ),
                     onSaved: (value){
                       street = value;
@@ -114,6 +138,7 @@ class _AddAddressState extends State<AddAddress> {
                     },
                   ),
                   TextFormField(
+                    initialValue: widget.item.name,
                     decoration: InputDecoration(
                         labelText: '收件人姓名'
                     ),
@@ -126,6 +151,7 @@ class _AddAddressState extends State<AddAddress> {
                     },
                   ),
                   TextFormField(
+                    initialValue: widget.item.phone,
                     decoration: InputDecoration(
                         labelText: '收件人手机号'
                     ),
@@ -146,7 +172,9 @@ class _AddAddressState extends State<AddAddress> {
             height: 42.0,
             child: RaisedButton(
               color: Color(0xffff1644),
-              onPressed: _addAddress,
+              onPressed: (){
+                _updateAddress();
+              },
               child: Text('确认添加',style: TextStyle(
                   fontSize: 18.0,
                   color: Colors.white
@@ -154,7 +182,7 @@ class _AddAddressState extends State<AddAddress> {
             ),
           )
         ],
-      )
+      ),
     );
   }
 }

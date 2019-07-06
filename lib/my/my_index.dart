@@ -154,14 +154,41 @@ class _MyIndexState extends State<MyIndex> {
                 onPressed: (){
                   Navigator.of(context).push(
                       MaterialPageRoute(builder: (context){
-                        return OrderList();
+                        return OrderList(status: -1,);
                       })
                   );
                 },
               ),
-              _buildOrderItem(Icons.payment, '待付款'),
-              _buildOrderItem(Icons.flight, '待收货'),
-              _buildOrderItem(Icons.insert_comment, '待评价'),
+              TouchCallback(
+                child: _buildOrderItem(Icons.payment, '待付款'),
+                onPressed: (){
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context){
+                        return OrderList(status: 1,);
+                      })
+                  );
+                },
+              ),
+              TouchCallback(
+                child: _buildOrderItem(Icons.flight, '待收货'),
+                onPressed: (){
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context){
+                        return OrderList(status: 4,);
+                      })
+                  );
+                },
+              ),
+              TouchCallback(
+                child: _buildOrderItem(Icons.insert_comment, '待评价'),
+                onPressed: (){
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context){
+                        return OrderList(status: 5,);
+                      })
+                  );
+                },
+              ),
             ],
           ),
         ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shop/common/data/doodle.dart';
-import 'package:timeline_list/timeline.dart';
-import 'package:timeline_list/timeline_model.dart';
+import 'package:timeline/timeline.dart';
+import 'package:timeline/model/timeline_model.dart';
 
 class Usage extends StatefulWidget {
   @override
@@ -10,55 +9,40 @@ class Usage extends StatefulWidget {
 
 class _UsageState extends State<Usage> {
 
-  timelineModel(TimelinePosition position) => Timeline.builder(
-      itemBuilder: centerTimelineBuilder,
-      itemCount: doodles.length,
-      physics: position == TimelinePosition.Left
-          ? ClampingScrollPhysics()
-          : BouncingScrollPhysics(),
-      position: position);
-
-  TimelineModel centerTimelineBuilder(BuildContext context, int i) {
-    final doodle = doodles[i];
-    final textTheme = Theme.of(context).textTheme;
-    return TimelineModel(
-        Card(
-          margin: EdgeInsets.symmetric(vertical: 16.0),
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-          clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Image.network(doodle.doodle),
-                const SizedBox(
-                  height: 8.0,
-                ),
-                Text(doodle.time, style: textTheme.caption),
-                const SizedBox(
-                  height: 8.0,
-                ),
-                Text(
-                  doodle.name,
-                  style: textTheme.title,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(
-                  height: 8.0,
-                ),
-              ],
-            ),
-          ),
-        ),
-        position:
-        i % 2 == 0 ? TimelineItemPosition.right : TimelineItemPosition.left,
-        isFirst: i == 0,
-        isLast: i == doodles.length,
-        iconBackground: doodle.iconBackground,
-        icon: doodle.icon);
-  }
+  final List<TimelineModel> list = [
+    TimelineModel(
+        id: "1",
+        description: "浏览商品详情",
+        title: "选购"),
+    TimelineModel(
+        id: "2",
+        description: "把心仪的商品加进购物车",
+        title: "加购物车"),
+    TimelineModel(
+        id: "2",
+        description: "选好规格，数量，下订单",
+        title: "下单"),
+    TimelineModel(
+        id: "2",
+        description: "微信支付宝转账，然后点击'我已付款'",
+        title: "付款"),
+    TimelineModel(
+        id: "2",
+        description: "店长收到付款通知，检查订单，确认收款",
+        title: "确认收款"),
+    TimelineModel(
+        id: "2",
+        description: "店长返货，给出快递信息",
+        title: "发货"),
+    TimelineModel(
+        id: "2",
+        description: "等待快递到手",
+        title: "收货"),
+    TimelineModel(
+        id: "2",
+        description: "给出您的评价",
+        title: "评价"),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +50,13 @@ class _UsageState extends State<Usage> {
       appBar: AppBar(
         title: Text('购物流程'),
       ),
-      body: timelineModel(TimelinePosition.Center),
+      body: new TimelineComponent(
+        timelineList: list,
+        // lineColor: Colors.red[200], // Defaults to accent color if not provided
+        // backgroundColor: Colors.black87, // Defaults to white if not provided
+//         headingColor: Colors.black, // Defaults to black if not provided
+        // descriptionColor: Colors.grey, // Defaults to grey if not provided
+      )
     );
   }
 }
