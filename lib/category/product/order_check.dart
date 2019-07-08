@@ -136,11 +136,41 @@ class _OrderCheck extends State<OrderCheck> {
       'remark': _remark
     }).then((res){
       CommonResModel _CommonResModel = CommonResModel.fromJson(json.decode(res.body));
-      print(res.body);
       if(_CommonResModel.errcode != 0){
         showToast(context, _CommonResModel.errmsg);
       }else{
         showToast(context, '下单成功');
+      }
+    });
+  }
+
+  _confirm(){
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context){
+        return AlertDialog(
+          title: Text('下单'),
+          content: Text('亲，确定下单吗？'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('取消'),
+              onPressed: (){
+                Navigator.of(context).pop('cancel');
+              },
+            ),
+            FlatButton(
+              child: Text('确定'),
+              onPressed: (){
+                Navigator.of(context).pop('ok');
+              },
+            )
+          ],
+        );
+      }
+    ).then((value){
+      if(value == 'ok'){
+        _createOrder();
       }
     });
   }
@@ -347,7 +377,7 @@ class _OrderCheck extends State<OrderCheck> {
                         if(_selectedAddressIndex == null){
                           showToast(context, '请先选择收货地址');
                         }else{
-                          _createOrder();
+                          _confirm();
                         }
                       },
                     )

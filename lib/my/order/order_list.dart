@@ -252,9 +252,8 @@ class _OrderListState extends State<OrderList> with SingleTickerProviderStateMix
           title: new Text('我的订单'),
           centerTitle: true,
           bottom: new TabBar(
-            isScrollable: true,
             tabs: <Widget>[
-              new Tab(child: Text('全部'),),
+              new Tab(text: '全部',),
               new Tab(child: Text('待付款'),),
               new Tab(child: Text('待发货'),),
               new Tab(child: Text('待收货'),),
