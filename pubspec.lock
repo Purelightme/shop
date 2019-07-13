@@ -120,6 +120,13 @@ packages:
       url: "https://github.com/LiuC520/flutter_drag_scale.git"
     source: git
     version: "0.0.1"
+  flutter_multiple_image_picker:
+    dependency: "direct main"
+    description:
+      name: flutter_multiple_image_picker
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.1"
   flutter_share_me:
     dependency: "direct main"
     description:
@@ -249,6 +256,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  smooth_star_rating:
+    dependency: "direct main"
+    description:
+      name: smooth_star_rating
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.3"
   source_span:
     dependency: transitive
     description:

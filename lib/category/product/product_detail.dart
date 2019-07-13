@@ -11,7 +11,9 @@ import 'package:shop/models/double_specification_product_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop/models/single_specification_product_model.dart';
 import 'package:shop/utils/token.dart';
+import 'package:smooth_star_rating/smooth_star_rating.dart';
 
+import 'comment_page.dart';
 import 'order_check.dart';
 
 class ProductDetail extends StatefulWidget {
@@ -78,6 +80,63 @@ class _ProductDetailState extends State<ProductDetail> {
         }
       });
     });
+  }
+  
+  _buildCommentItem(item){
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: CircleAvatar(
+                    backgroundImage: NetworkImage(item.user.avatar),
+                  ),
+                ),
+                Container(
+                  child: Text(item.user.name),
+                )
+              ],
+            ),
+            SmoothStarRating(
+              allowHalfRating: true,
+              onRatingChanged: null,
+              starCount: 5,
+              rating: item.star.toDouble(),
+              size: 20.0,
+              color: Colors.redAccent,
+              borderColor: Colors.grey,
+            )
+          ],
+        ),
+        Container(
+          padding: EdgeInsets.only(left: 10),
+          child: Text(item.createdAt +"   "+ item.specificationString,style: TextStyle(
+              color: Colors.grey
+          ),),
+        ),
+        Container(
+          padding: EdgeInsets.all(10),
+          child: Text(item.content,style: TextStyle(
+              fontSize: 16
+          ),),
+        ),
+        Divider()
+      ],
+    );
+  }
+
+  Widget _buildComments(){
+    return Column(
+      children: _doubleSpecificationProductModel.data.comments.comments.map<Widget>((commentItem){
+        return _buildCommentItem(commentItem);
+      }).toList()
+    );
   }
 
   _chooseSpecification(context) {
@@ -373,6 +432,14 @@ class _ProductDetailState extends State<ProductDetail> {
     }));
   }
 
+  _toComments(productId){
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context){
+        return new CommentPage(productId: productId,);
+      })
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -640,7 +707,7 @@ class _ProductDetailState extends State<ProductDetail> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text('宝贝评价(5)'),
+                                Text('宝贝评价(${_doubleSpecificationProductModel.data.comments.total})'),
                                 GestureDetector(
                                   child: Row(
                                     children: <Widget>[
@@ -648,62 +715,16 @@ class _ProductDetailState extends State<ProductDetail> {
                                       Icon(Icons.arrow_forward_ios)
                                     ],
                                   ),
+                                  onTap: (){
+                                    _toComments(widget.ProductId);
+                                  },
                                 ),
                               ],
                             ),
                           ),
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                child: Column(
-                                  children: <Widget>[
-                                    Row(
-                                      children: <Widget>[
-                                        CircleAvatar(
-                                          backgroundImage: AssetImage('images/banners/xiezi.jpeg'),
-                                        ),
-                                        Container(
-                                          margin: EdgeInsets.only(left: 10),
-                                          child: Text('张三'),
-                                        )
-                                      ],
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.all(10),
-                                      child: Text('产品非常好'),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                padding: EdgeInsets.all(10),
-                                child: Column(
-                                  children: <Widget>[
-                                    Row(
-                                      children: <Widget>[
-                                        CircleAvatar(
-                                          backgroundImage: AssetImage('images/banners/xiezi.jpeg'),
-                                        ),
-                                        Container(
-                                          margin: EdgeInsets.only(left: 10),
-                                          child: Text('张三'),
-                                        )
-                                      ],
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.all(10),
-                                      child: Text('产品非常好'),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                          _doubleSpecificationProductModel.data.comments.total == 0 ?
+                              Container() :
+                          _buildComments()
                         ],
                       ),
                     ),

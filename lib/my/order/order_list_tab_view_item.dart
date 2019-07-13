@@ -7,115 +7,106 @@ import 'package:shop/common/notification.dart';
 import 'package:shop/models/common_res_model.dart';
 import 'package:shop/models/order_list_model.dart';
 import 'package:shop/my/order/order_comment.dart';
+import 'package:shop/my/order/order_detail.dart';
 import 'package:shop/utils/token.dart';
-import 'order_detail.dart';
 import 'package:http/http.dart' as http;
 
-class OrderList extends StatefulWidget {
 
-  OrderList({@required this.status});
+class OrderListTabViewItem extends StatefulWidget {
+
+  OrderListTabViewItem({@required this.status});
 
   int status;
 
   @override
-  _OrderListState createState() => _OrderListState();
+  _OrderListTabViewItemState createState() => _OrderListTabViewItemState();
 }
 
-class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixin {
+class _OrderListTabViewItemState extends State<OrderListTabViewItem> with AutomaticKeepAliveClientMixin {
 
   @override
   bool get wantKeepAlive => true;
 
-  Map<int,List> _items = {
-    -1:<Item>[],
-    1:<Item>[],
-    3:<Item>[],
-    4:<Item>[],
-    5:<Item>[],
-  };
+  List<Item> _items = [];
+  int _page = 0;
+  bool _hasMore = true;
 
-  Map<int,int> indexes = {
-    -1:0,
-    1:1,
-    3:2,
-    4:3,
-    5:4
-  };
-
-  TabController _tabController;
-
-  Widget _buildProductItem(int status,int index,SpecificationSnapshot sp){
+  Widget _buildProductItem(int index,SpecificationSnapshot sp){
     return Container(
-        padding: EdgeInsets.all(10),
-        color: Colors.grey.withOpacity(0.1),
-        child: Row(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(10),
-              child: Row(
-                children: <Widget>[
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(sp.imageCover),
+      padding: EdgeInsets.all(10),
+      color: Colors.grey.withOpacity(0.1),
+      child: Row(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.all(10),
+            child: Row(
+              children: <Widget>[
+                CircleAvatar(
+                  backgroundImage: NetworkImage(sp.imageCover),
+                ),
+                Container(
+                  width: 200,
+                  margin: EdgeInsets.only(left: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(sp.longTitle,softWrap: true,maxLines: 1,overflow: TextOverflow.ellipsis,),
+                      Text('规格：${sp.specificationString}')
+                    ],
                   ),
-                  Container(
-                    width: 200,
-                    margin: EdgeInsets.only(left: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(sp.longTitle,softWrap: true,maxLines: 1,overflow: TextOverflow.ellipsis,),
-                        Text('规格：${sp.specificationString}')
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                )
+              ],
             ),
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                  margin: EdgeInsets.all(10),
-                    child: Text('\￥${sp.price}',),
-                  ),
-                  Container(
-                    child: Text('×${sp.number}',style: TextStyle(
-                        color: Colors.grey.withOpacity(0.5)
-                    ),),
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
-      );
-  }
-
-  _payed(int status,int index)async{
-    showDialog(
-      context: context,
-      child: AlertDialog(
-        title: Text('已付款'),
-        content: Text('我已付款，通知店长确认'),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('取消'),
-            onPressed: (){
-              Navigator.of(context).pop('cancel');
-            },
           ),
-          FlatButton(
-            child: Text('确定'),
-            onPressed: (){
-              Navigator.of(context).pop('ok');
-            },
+          Expanded(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text('\￥${sp.price}',),
+                ),
+                Container(
+                  child: Text('×${sp.number}',style: TextStyle(
+                      color: Colors.grey.withOpacity(0.5)
+                  ),),
+                )
+              ],
+            ),
           )
         ],
-      )
+      ),
+    );
+  }
+
+  _noBtns(){
+    return [Container()];
+  }
+
+  _payed(int index)async{
+    showDialog(
+        context: context,
+        child: AlertDialog(
+          title: Text('已付款'),
+          content: Text('我已付款，通知店长确认'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('取消'),
+              onPressed: (){
+                Navigator.of(context).pop('cancel');
+              },
+            ),
+            FlatButton(
+              child: Text('确定'),
+              onPressed: (){
+                Navigator.of(context).pop('ok');
+              },
+            )
+          ],
+        )
     ).then((value)async{
       if(value == 'ok'){
         String token = await getToken();
-        http.put(api_prefix+'/orders/${_items[status][index].id}/pay',headers: {
+        http.put(api_prefix+'/orders/${_items[index].id}/pay',headers: {
           'Authorization':'Bearer $token'
         }).then((res){
           CommonResModel _commonResModel = CommonResModel.fromJson(json.decode(res.body));
@@ -124,8 +115,8 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
           }else{
             showToast(context, '已通知店长确认');
             setState(() {
-              _items[status][index].status = 2;
-              _items[status][index].statusDesc = '待确认';
+              _items[index].status = 2;
+              _items[index].statusDesc = '待确认';
             });
           }
         });
@@ -133,7 +124,7 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
     });
   }
 
-  _cancel(int status,int index)async{
+  _cancel(int index)async{
     showDialog(
         context: context,
         child: AlertDialog(
@@ -157,7 +148,7 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
     ).then((value)async{
       if(value == 'ok'){
         String token = await getToken();
-        http.put(api_prefix+'/orders/${_items[status][index].id}/cancel',headers: {
+        http.put(api_prefix+'/orders/${_items[index].id}/cancel',headers: {
           'Authorization':'Bearer $token'
         }).then((res){
           CommonResModel _commonResModel = CommonResModel.fromJson(json.decode(res.body));
@@ -166,8 +157,8 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
           }else{
             showToast(context, '已取消订单');
             setState(() {
-              _items[status][index].status = 0;
-              _items[status][index].statusDesc = '已取消';
+              _items[index].status = 0;
+              _items[index].statusDesc = '已取消';
             });
           }
         });
@@ -175,7 +166,7 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
     });
   }
 
-  _receive(int status,int index)async{
+  _receive(int index)async{
     showDialog(
         context: context,
         child: AlertDialog(
@@ -199,7 +190,7 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
     ).then((value)async{
       if(value == 'ok'){
         String token = await getToken();
-        http.put(api_prefix+'/orders/${_items[status][index].id}/receive',headers: {
+        http.put(api_prefix+'/orders/${_items[index].id}/receive',headers: {
           'Authorization':'Bearer $token'
         }).then((res){
           CommonResModel _commonResModel = CommonResModel.fromJson(json.decode(res.body));
@@ -208,8 +199,8 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
           }else{
             showToast(context, '已确认收货');
             setState(() {
-              _items[status][index].status = 5;
-              _items[status][index].statusDesc = '待评价';
+              _items[index].status = 5;
+              _items[index].statusDesc = '待评价';
             });
           }
         });
@@ -217,8 +208,8 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
     });
   }
 
-  List<Widget> _buildBtns(int status, int index) {
-    switch(_items[status][index].status){
+  List<Widget> _buildBtns(int index) {
+    switch(_items[index].status){
       case 0:
         return _noBtns();
         break;
@@ -241,7 +232,7 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
               ),),
             ),
             onTap: () {
-              _cancel(status, index);
+              _cancel(index);
             },
           ),
           GestureDetector(
@@ -261,7 +252,7 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
               ),),
             ),
             onTap: () {
-              _payed(status, index);
+              _payed(index);
             },
           ),
         ];
@@ -291,7 +282,7 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
               ),),
             ),
             onTap: () {
-              _receive(status, index);
+              _receive(index);
             },
           ),
         ];
@@ -316,12 +307,12 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
             ),
             onTap: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context){
-                  return OrderComment(
-                    specificationSnapshot: _items[status][index].specificationSnapshot,
-                    orderId: _items[status][index].id,
-                  );
-                })
+                  MaterialPageRoute(builder: (context){
+                    return OrderComment(
+                      specificationSnapshot: _items[index].specificationSnapshot,
+                      orderId: _items[index].id,
+                    );
+                  })
               );
             },
           ),
@@ -333,11 +324,7 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
     }
   }
 
-  _noBtns(){
-    return [Container()];
-  }
-
-  Widget _buildOrderItem(int status,int index){
+  Widget _buildOrderItem(int index){
     return GestureDetector(
       child: Container(
         child: Column(
@@ -347,30 +334,30 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text('订单号:${_items[status][index].orderNo}'),
-                  Text('${_items[status][index].statusDesc}',style: TextStyle(
+                  Text('订单号:${_items[index].orderNo}'),
+                  Text('${_items[index].statusDesc}',style: TextStyle(
                       color: Colors.redAccent
                   ),)
                 ],
               ),
             ),
-            ..._items[status][index].specificationSnapshot.map((sp){
-              return _buildProductItem(status,index,sp);
+            ..._items[index].specificationSnapshot.map((sp){
+              return _buildProductItem(index,sp);
             }).toList(),
             Container(
               padding: EdgeInsets.only(top: 8,right: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Text('共${_items[status][index].productNumber}件商品 合计￥${_items[status][index].amount}'),
-                  Text('(含运费￥${_items[status][index].expressFee})')
+                  Text('共${_items[index].productNumber}件商品 合计￥${_items[index].amount}'),
+                  Text('(含运费￥${_items[index].expressFee})')
                 ],
               ),
             ),
             Divider(),
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: _buildBtns(status,index)
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: _buildBtns(index)
             ),
             commonDivider()
           ],
@@ -378,86 +365,62 @@ class _OrderListState extends State<OrderList> with AutomaticKeepAliveClientMixi
       ),
       onTap: (){
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context){
-            return OrderDetail(orderId: _items[status][index].id,);
-          })
+            MaterialPageRoute(builder: (context){
+              return OrderDetail(orderId: _items[index].id,);
+            })
         );
       },
     );
   }
 
+  ScrollController _scrollController = new ScrollController();
+
   @override
   void initState() {
-    super.initState();
-    _getFirstPageByStatus(widget.status);
-    _tabController = new TabController(length: 5,vsync: this);
-    _tabController.addListener((){
-      switch(_tabController.index){
-        case 0:
-          _getFirstPageByStatus(-1);
-          break;
-        case 1:
-          _getFirstPageByStatus(1);
-          break;
-        case 2:
-          _getFirstPageByStatus(3);
-          break;
-        case 3:
-          _getFirstPageByStatus(4);
-          break;
-        case 4:
-          _getFirstPageByStatus(5);
-          break;
+    _scrollController.addListener((){
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _loadMore();
+        print('我监听到底部了!');
       }
     });
+    super.initState();
+    _loadMore();
   }
 
-  _getFirstPageByStatus(int status)async{
+  _loadMore()async{
+    if(!_hasMore){
+      showToast(context, '没有更多啦');
+      return;
+    }
+    setState(() {
+      _page++;
+    });
     String token = await getToken();
     String url;
-    if(status == -1){
+    if(widget.status == -1){
       url = api_prefix + '/orders';
     }else{
-      url = api_prefix + '/orders?status=$status';
+      url = api_prefix + '/orders?status=${widget.status}';
     }
     http.get(url,headers: {
       'Authorization':'Bearer $token'
     }).then((res){
       OrderListModel orderListModel = OrderListModel.fromJson(json.decode(res.body));
       setState(() {
-        _items[status].addAll(orderListModel.data.data);
+        _items.addAll(orderListModel.data.data);
       });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: new AppBar(
-          title: new Text('我的订单'),
-          centerTitle: true,
-          bottom: new TabBar(
-            tabs: <Widget>[
-              new Tab(text: '全部',),
-              new Tab(child: Text('待付款'),),
-              new Tab(child: Text('待发货'),),
-              new Tab(child: Text('待收货'),),
-              new Tab(child: Text('待评价'),),
-            ],
-            controller: _tabController,
-          ),
-        ),
-        body: TabBarView(
-          controller: _tabController,
-          children: [-1,1,3,4,5].map((status){
-            return ListView.builder(
-              itemCount: _items[status].length,
-              itemBuilder: (context,index){
-                return _buildOrderItem(status,index);
-              },
-            );
-          }).toList()
-        ),
-      );
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: _items.length,
+      itemBuilder: (context,index){
+        return _buildOrderItem(index);
+      },
+    );
   }
 }

@@ -148,8 +148,7 @@ class _OrderCheck extends State<OrderCheck> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (BuildContext context){
-        return AlertDialog(
+      child: AlertDialog(
           title: Text('下单'),
           content: Text('亲，确定下单吗？'),
           actions: <Widget>[
@@ -166,8 +165,7 @@ class _OrderCheck extends State<OrderCheck> {
               },
             )
           ],
-        );
-      }
+        )
     ).then((value){
       if(value == 'ok'){
         _createOrder();
