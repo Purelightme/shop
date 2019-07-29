@@ -38,6 +38,7 @@ class _ProductDetailState extends State<ProductDetail> {
   int _secondIndex = 0;
   int _selectedProductSpecification;
   int _number = 1;
+  PersistentBottomSheetController bottomSheetController = null;
 
   CarouselSlider getFullScreenCarousel(BuildContext mediaContext) {
     return CarouselSlider(
@@ -83,7 +84,6 @@ class _ProductDetailState extends State<ProductDetail> {
   }
   
   _buildCommentItem(item){
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -139,172 +139,222 @@ class _ProductDetailState extends State<ProductDetail> {
     );
   }
 
-  _chooseSpecification(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context){
-          return StatefulBuilder(
-            builder: (context1,state){
-              return GestureDetector(
-                child: Container(
-                  height: MediaQuery
-                      .of(context)
-                      .size
-                      .height - 200,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.all(20),
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                image: DecorationImage(
-                                  image: NetworkImage(
-                                      _doubleSpecificationProductModel.data.imageCover),
-                                  fit: BoxFit.cover,
-                                )
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text('￥${_isDoubleSpecification ?
-                                    _doubleSpecificationProductModel.data.specifications[_firstIndex].children[_secondIndex].children[0].price:
-                                _singleSpecificationProductModel.data.specifications[_firstIndex].children[0].price}', style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.redAccent,
-                                    fontWeight: FontWeight.w500
-                                ),),
-                                Text('库存${_isDoubleSpecification ?
-                                _doubleSpecificationProductModel.data.specifications[_firstIndex].children[_secondIndex].children[0].stock:
-                                _singleSpecificationProductModel.data.specifications[_firstIndex].children[0].stock}', style: TextStyle(
-                                    color: Colors.grey.withOpacity(0.6)
-                                ),),
-                                Text('已选：' + (_isDoubleSpecification ?
-                                _doubleSpecificationProductModel.data.specifications[_firstIndex].title + ' ' + _doubleSpecificationProductModel.data.specifications[_firstIndex].children[_secondIndex].title:
-                                _singleSpecificationProductModel.data.specifications[_firstIndex].title))
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                      Divider(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: _buildSpecification(state),
-                      ),
-                      Divider(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Text('购买数量'),
-                          ),
-                          Row(
-                            children: <Widget>[
-                              FlatButton(
-                                child: Icon(Icons.remove,size: 20,),
-                                onPressed: (){
-                                  state((){
-                                    if (_number > 1){
-                                      _number--;
-                                    }
-                                  });
-                                },
-                              ),
-                              Text(_number.toString()),
-                              FlatButton(
-                                child: Icon(Icons.add,size: 20,),
-                                onPressed: (){
-                                  state((){
-                                    if (_number < 20){
-                                      _number++;
-                                    }
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Divider(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          GestureDetector(
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  gradient: LinearGradient(colors: [
-                                    Colors.yellowAccent,
-                                    Colors.orangeAccent
-                                  ]),
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(20),
-                                      bottomLeft: Radius.circular(20)
-                                  )
-                              ),
-                              child: Center(
-                                child: Text('加入购物车'),
-                              ),
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width / 2,
-                            ),
-                            onTap: _addToCart,
-                          ),
-                          GestureDetector(
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  gradient: LinearGradient(colors: [
-                                    Colors.orange,
-                                    Colors.redAccent
-                                  ]),
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      bottomRight: Radius.circular(20)
-                                  )
-                              ),
-                              child: Center(
-                                child: Text('立即购买'),
-                              ),
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width / 2,
-                            ),
-                            onTap: (){
-                              _toOrderCheck();
-                            },
-                          )
-                        ],
-                      ),
-
-                    ],
-                  ),
-                ),
-                onTap: (){
-                  print('22');
-                },
-              );
-            },
-          );
-        }
-    ).then((val) {
+  _close(){
+    bottomSheetController.close();
+    setState(() {
 
     });
   }
 
+  _chooseSpecification(context)async {
+    bottomSheetController = await showBottomSheet(
+        context: context,
+        builder: (context){
+          return StatefulBuilder(
+            builder: (context1, state) {
+              return Container(
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
+                  height: _isDoubleSpecification ? MediaQuery
+                      .of(context)
+                      .size
+                      .height - 340 :  MediaQuery
+                      .of(context)
+                      .size
+                      .height - 400,
+                    child: Stack(
+                    children: <Widget>[
+                      Container(
+                        color: Colors.pinkAccent.withOpacity(0.2),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Container(
+                                    margin: EdgeInsets.all(20),
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                              _doubleSpecificationProductModel.data
+                                                  .imageCover),
+                                          fit: BoxFit.cover,
+                                        )
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: <Widget>[
+                                        Text('￥${_isDoubleSpecification ?
+                                        _doubleSpecificationProductModel.data
+                                            .specifications[_firstIndex]
+                                            .children[_secondIndex].children[0].price :
+                                        _singleSpecificationProductModel.data
+                                            .specifications[_firstIndex].children[0]
+                                            .price}', style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.redAccent,
+                                            fontWeight: FontWeight.w500
+                                        ),),
+                                        Text('库存${_isDoubleSpecification ?
+                                        _doubleSpecificationProductModel.data
+                                            .specifications[_firstIndex]
+                                            .children[_secondIndex].children[0].stock :
+                                        _singleSpecificationProductModel.data
+                                            .specifications[_firstIndex].children[0]
+                                            .stock}', style: TextStyle(
+                                            color: Colors.grey.withOpacity(0.6)
+                                        ),),
+                                        Text('已选：' + (_isDoubleSpecification ?
+                                        _doubleSpecificationProductModel.data
+                                            .specifications[_firstIndex].title + ' ' +
+                                            _doubleSpecificationProductModel.data
+                                                .specifications[_firstIndex]
+                                                .children[_secondIndex].title :
+                                        _singleSpecificationProductModel.data
+                                            .specifications[_firstIndex].title))
+                                      ],
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(right: 10,top: 10),
+                                      child: Icon(Icons.clear,color: Colors.redAccent,),
+                                    ),
+                                    onTap: (){
+                                      _close();
+                                    },
+                                  )
+                                ],
+                              ),
+                              Divider(),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: _buildSpecification(state),
+                              ),
+                              Divider(),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 20),
+                                    child: Text('购买数量'),
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      FlatButton(
+                                        child: Icon(Icons.remove, size: 20,),
+                                        onPressed: () {
+                                          state(() {
+                                            if (_number > 1) {
+                                              _number--;
+                                            }
+                                          });
+                                        },
+                                      ),
+                                      Text(_number.toString()),
+                                      FlatButton(
+                                        child: Icon(Icons.add, size: 20,),
+                                        onPressed: () {
+                                          state(() {
+                                            if (_number < 20) {
+                                              _number++;
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Divider(),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  GestureDetector(
+                                    child: Container(
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                          gradient: LinearGradient(colors: [
+                                            Colors.yellowAccent,
+                                            Colors.orangeAccent
+                                          ]),
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(20),
+                                              bottomLeft: Radius.circular(20)
+                                          )
+                                      ),
+                                      child: Center(
+                                        child: Text('加入购物车'),
+                                      ),
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width / 2,
+                                    ),
+                                    onTap: _addToCart,
+                                  ),
+                                  GestureDetector(
+                                    child: Container(
+                                      padding: EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                          gradient: LinearGradient(colors: [
+                                            Colors.orange,
+                                            Colors.redAccent
+                                          ]),
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(20),
+                                              bottomRight: Radius.circular(20)
+                                          )
+                                      ),
+                                      child: Center(
+                                        child: Text('立即购买'),
+                                      ),
+                                      width: MediaQuery
+                                          .of(context)
+                                          .size
+                                          .width / 2,
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+
+                                      });
+                                      _toOrderCheck();
+                                    },
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                      )
+                    ],
+                  )
+                );
+            },
+          );
+        }
+    );
+  }
+
   List<Widget> _buildSpecification(state){
     if (_isDoubleSpecification){
+      state(() {
+        _selectedProductSpecification = _doubleSpecificationProductModel.data.specifications[_firstIndex]
+            .children[_secondIndex].children[0].id;
+      });
       return [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
@@ -372,6 +422,10 @@ class _ProductDetailState extends State<ProductDetail> {
         ),
       ];
     }else{
+      state(() {
+        _selectedProductSpecification = _singleSpecificationProductModel.data.specifications[_firstIndex]
+            .children[0].id;
+      });
       return [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
@@ -409,6 +463,9 @@ class _ProductDetailState extends State<ProductDetail> {
   }
 
   _addToCart()async{
+    setState(() {
+
+    });
     String token = await getToken();
     http.post(api_prefix + '/user/shopping_carts',body: {
       'product_specification_id':_selectedProductSpecification.toString(),
@@ -791,25 +848,29 @@ class _ProductDetailState extends State<ProductDetail> {
                               children: <Widget>[
                                 Column(
                                   children: <Widget>[
-                                    Icon(Icons.menu),
-                                    Text('客服')
+                                    Icon(Icons.person,color: Colors.blueAccent,),
+                                    Text('客服',style: TextStyle(
+                                        color: Colors.black.withOpacity(0.5)
+                                    ),)
                                   ],
                                 ),
                                 Container(
                                   margin: EdgeInsets.symmetric(horizontal: 30),
                                   child: Column(
                                     children: <Widget>[
-                                      Icon(Icons.star_border),
-                                      Text('收藏')
+                                      Icon(Icons.star_border,color: Colors.orangeAccent,),
+                                      Text('收藏',style: TextStyle(
+                                          color: Colors.black.withOpacity(0.5)
+                                      ),)
                                     ],
                                   ),
                                 ),
                                 GestureDetector(
                                   child: Column(
                                     children: <Widget>[
-                                      Icon(Icons.add_shopping_cart,color: Colors.redAccent,),
+                                      Icon(Icons.add_shopping_cart,color: Colors.purpleAccent,),
                                       Text('购物车',style: TextStyle(
-                                          color: Colors.redAccent
+                                          color: Colors.black.withOpacity(0.5)
                                       ),)
                                     ],
                                   ),
@@ -840,8 +901,13 @@ class _ProductDetailState extends State<ProductDetail> {
                                           bottomLeft: Radius.circular(20)
                                       )
                                   ),
-                                  child: Center(
-                                    child: Text('加入购物车'),
+                                  child: GestureDetector(
+                                    child: Center(
+                                      child: Text('加入购物车'),
+                                    ),
+                                    onTap: (){
+                                      _chooseSpecification(context);
+                                    },
                                   ),
                                   width: 100,
                                 ),
@@ -857,8 +923,13 @@ class _ProductDetailState extends State<ProductDetail> {
                                           bottomRight: Radius.circular(20)
                                       )
                                   ),
-                                  child: Center(
-                                    child: Text('立即购买'),
+                                  child: GestureDetector(
+                                    child: Center(
+                                      child: Text('立即购买'),
+                                    ),
+                                    onTap: (){
+                                      _chooseSpecification(context);
+                                    },
                                   ),
                                   width: 100,
                                 ),

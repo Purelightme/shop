@@ -5,6 +5,7 @@ import 'package:shop/api/api.dart';
 import 'package:shop/common/entry_item.dart';
 import 'package:shop/common/touch_callback.dart';
 import 'package:flutter_badge/flutter_badge.dart';
+import 'package:shop/models/badge_model.dart';
 import 'package:shop/models/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,9 +20,10 @@ class MyIndex extends StatefulWidget {
 
 class _MyIndexState extends State<MyIndex> {
 
-  Widget _buildOrderItem(IconData icon, String text) {
+  Widget _buildOrderItem(IconData icon, String text,int num) {
     return Badge(
-        number: 1,
+        number: num,
+        visible: num != 0,
         backgroundColor: Colors.white,
         offsetX: -8,
         offsetY: -8,
@@ -34,7 +36,7 @@ class _MyIndexState extends State<MyIndex> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(icon, color: Colors.black54,),
+              Icon(icon, color: Colors.redAccent,),
               Container(
                   margin: EdgeInsets.only(top: 8.0),
                   child: Text(text, style: TextStyle(
@@ -49,6 +51,10 @@ class _MyIndexState extends State<MyIndex> {
 
   UserModel _userModel;
   bool _isLogined = false;
+  bool _isLoading = true;
+  num waitPays = 0;
+  num waitReceives = 0;
+  num waitComments = 0;
 
   @override
   void initState() {
@@ -60,12 +66,26 @@ class _MyIndexState extends State<MyIndex> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
     if (token.isNotEmpty){
+      //请求个人信息
       http.get(api_prefix + '/user/info',headers: {
         'Authorization':'Bearer ' + token
       }).then((res){
         setState(() {
           _userModel = UserModel.fromJson(json.decode(res.body));
           _isLogined = true;
+          _isLoading = false;
+        });
+      });
+
+      //请求badge
+      http.get(api_prefix + '/order/badge',headers: {
+        'Authorization':'Bearer ' + token
+      }).then((res){
+        setState(() {
+          BadgeModel _badgeModel = BadgeModel.fromJson(json.decode(res.body));
+          waitPays = _badgeModel.data.waitPays;
+          waitReceives = _badgeModel.data.waitReceives;
+          waitComments = _badgeModel.data.waitComments;
         });
       });
     }
@@ -117,6 +137,7 @@ class _MyIndexState extends State<MyIndex> {
             ),
           ),
         ) :
+            !_isLoading ?
         Container(
           margin: EdgeInsets.only(top: 20.0),
           color: Colors.white,
@@ -140,7 +161,17 @@ class _MyIndexState extends State<MyIndex> {
               ),
             ],
           ),
-        ),
+        ) : Container(
+              margin: EdgeInsets.only(top: 20.0),
+              color: Colors.white,
+              height: 80.0,
+              child: ButtonBar(
+                alignment: MainAxisAlignment.center,
+                children: <Widget>[
+
+                ],
+              ),
+            ),
         Container(
           height: 100.0,
           margin: EdgeInsets.only(top: 20.0),
@@ -150,41 +181,41 @@ class _MyIndexState extends State<MyIndex> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               TouchCallback(
-                child: _buildOrderItem(Icons.menu,'全部订单'),
+                child: _buildOrderItem(Icons.menu,'全部订单',0),
                 onPressed: (){
                   Navigator.of(context).push(
                       MaterialPageRoute(builder: (context){
-                        return OrderList(status: -1,);
+                        return OrderList(initIndex: 0,);
                       })
                   );
                 },
               ),
               TouchCallback(
-                child: _buildOrderItem(Icons.payment, '待付款'),
+                child: _buildOrderItem(Icons.payment, '待付款',waitPays),
                 onPressed: (){
                   Navigator.of(context).push(
                       MaterialPageRoute(builder: (context){
-                        return OrderList(status: 1,);
+                        return OrderList(initIndex: 1,);
                       })
                   );
                 },
               ),
               TouchCallback(
-                child: _buildOrderItem(Icons.flight, '待收货'),
+                child: _buildOrderItem(Icons.flight, '待收货',waitReceives),
                 onPressed: (){
                   Navigator.of(context).push(
                       MaterialPageRoute(builder: (context){
-                        return OrderList(status: 4,);
+                        return OrderList(initIndex: 3,);
                       })
                   );
                 },
               ),
               TouchCallback(
-                child: _buildOrderItem(Icons.insert_comment, '待评价'),
+                child: _buildOrderItem(Icons.insert_comment, '待评价',waitComments),
                 onPressed: (){
                   Navigator.of(context).push(
                       MaterialPageRoute(builder: (context){
-                        return OrderList(status: 5,);
+                        return OrderList(initIndex: 4,);
                       })
                   );
                 },
@@ -198,7 +229,7 @@ class _MyIndexState extends State<MyIndex> {
           child: Column(
             children: <Widget>[
               EntryItem(
-                icon: Icon(Icons.message),
+                icon: Icon(Icons.message,color: Colors.lime,),
                 title: '我的消息',
                 onPressed: (){
                   Navigator.of(context).pushNamed('/message');
@@ -212,7 +243,7 @@ class _MyIndexState extends State<MyIndex> {
                 ),
               ),
               EntryItem(
-                icon: Icon(Icons.shopping_cart),
+                icon: Icon(Icons.shopping_cart,color: Colors.purpleAccent,),
                 title: '购物车',
                 onPressed: (){
                   Navigator.of(context).pushNamed('/cart');
@@ -226,7 +257,7 @@ class _MyIndexState extends State<MyIndex> {
                 ),
               ),
               EntryItem(
-                icon: Icon(Icons.recent_actors),
+                icon: Icon(Icons.recent_actors,color: Colors.blue,),
                 title: '收货地址',
                 onPressed: (){
                   Navigator.of(context).pushNamed('/receive_address');
@@ -240,7 +271,7 @@ class _MyIndexState extends State<MyIndex> {
                 ),
               ),
               EntryItem(
-                icon: Icon(Icons.data_usage),
+                icon: Icon(Icons.data_usage,color: Colors.lightGreen,),
                 title: '购物流程',
                 onPressed: (){
                   Navigator.of(context).pushNamed('/usage');
@@ -254,7 +285,7 @@ class _MyIndexState extends State<MyIndex> {
                 ),
               ),
               EntryItem(
-                icon: Icon(Icons.help),
+                icon: Icon(Icons.help,color: Colors.cyan,),
                 title: '关于小店',
                 onPressed: (){
                   Navigator.of(context).pushNamed('/about');

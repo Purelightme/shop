@@ -14,7 +14,7 @@ class _ActivityDetailState extends State<ActivityDetail> {
       ),
       body: Container(
         child: Center(
-          child: Text('活动详情'),
+          child: Text('敬请期待'),
         ),
       ),
     );

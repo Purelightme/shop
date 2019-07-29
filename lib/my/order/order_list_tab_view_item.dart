@@ -399,17 +399,29 @@ class _OrderListTabViewItemState extends State<OrderListTabViewItem> with Automa
     String token = await getToken();
     String url;
     if(widget.status == -1){
-      url = api_prefix + '/orders';
+      url = api_prefix + '/orders?page=$_page';
     }else{
-      url = api_prefix + '/orders?status=${widget.status}';
+      url = api_prefix + '/orders?status=${widget.status}&page=$_page';
     }
     http.get(url,headers: {
       'Authorization':'Bearer $token'
     }).then((res){
       OrderListModel orderListModel = OrderListModel.fromJson(json.decode(res.body));
-      setState(() {
-        _items.addAll(orderListModel.data.data);
-      });
+      if(orderListModel.errcode != 0){
+        showToast(context, orderListModel.errmsg);
+        return;
+      }
+      if(orderListModel.data.data.length < orderListModel.data.perPage){
+        setState(() {
+          _items.addAll(orderListModel.data.data);
+          _hasMore = false;
+        });
+      }else{
+        setState(() {
+          _items.addAll(orderListModel.data.data);
+          _hasMore = true;
+        });
+      }
     });
   }
 

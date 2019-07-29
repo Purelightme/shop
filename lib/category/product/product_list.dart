@@ -62,21 +62,20 @@ class _ProductListState extends State<ProductList> {
             .of(context)
             .size
             .width,
-        color: Colors.grey,
+        color: Colors.redAccent.withOpacity(0.5),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
               padding: EdgeInsets.all(10),
-              child: Text('综合'),
+              child: Text('最新'),
             ),
             Container(
               padding: EdgeInsets.all(10),
               child: Text('销量'),
             ),
             Container(
-//                        padding: EdgeInsets.all(10),
               child: Row(
                 children: <Widget>[
                   Container(
@@ -88,8 +87,8 @@ class _ProductListState extends State<ProductList> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Icon(Icons.arrow_drop_up, size: 20,),
-                        Icon(Icons.arrow_drop_down, size: 20,)
+                        Icon(Icons.keyboard_arrow_up, size: 20,color: Colors.blueAccent,),
+                        Icon(Icons.keyboard_arrow_down, size: 20,)
                       ],
                     ),
                   )
@@ -203,6 +202,7 @@ class _ProductListState extends State<ProductList> {
                       color: Colors.redAccent
                   ),),
                 ),
+                _productListModel.data.data[index].sellingPoint.isNotEmpty ?
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -221,7 +221,7 @@ class _ProductListState extends State<ProductList> {
                       padding: EdgeInsets.all(1),
                     )).toList()
                   ),
-                )
+                ) : Container()
               ],
             )
           ],

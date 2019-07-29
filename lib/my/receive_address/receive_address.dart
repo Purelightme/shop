@@ -125,7 +125,7 @@ class _ReceiveAddressState extends State<ReceiveAddress> {
         ),
       ),
       onLongPress: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (context){
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context){
           return UpdateAddress(item: data,);
         }));
       },

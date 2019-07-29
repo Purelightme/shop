@@ -124,9 +124,10 @@ class _OrderDetailState extends State<OrderDetail> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
+                  width: MediaQuery.of(context).size.width - 60,
                   child: Text(express.detail[0].status,style: TextStyle(
                       color: Colors.green
-                  ),),
+                  ),softWrap: true,overflow: TextOverflow.ellipsis,),
                 ),
                 Container(
                   padding: EdgeInsets.only(top: 3),

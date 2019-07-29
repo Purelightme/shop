@@ -8,6 +8,8 @@ import 'package:shop/common/notification.dart';
 import 'package:shop/models/address_model.dart' as am;
 import 'package:shop/models/common_res_model.dart';
 import 'package:shop/models/product_specification_model.dart';
+import 'package:shop/my/order/order_detail.dart';
+import 'package:shop/my/order/order_list.dart';
 import 'package:shop/utils/token.dart';
 
 class OrderCheck extends StatefulWidget {
@@ -28,7 +30,7 @@ class _OrderCheck extends State<OrderCheck> {
   int _num = 1;
   List<am.Data> _addresses = [];
   int _selectedAddressIndex;
-  String _remark;
+  String _remark = '';
 
   @override
   initState(){
@@ -126,6 +128,7 @@ class _OrderCheck extends State<OrderCheck> {
   }
 
   _createOrder()async{
+    print(_remark);
     String token = await getToken();
     http.post(api_prefix+'/orders',headers: {
       'Authorization':'Bearer $token'
@@ -140,6 +143,11 @@ class _OrderCheck extends State<OrderCheck> {
         showToast(context, _CommonResModel.errmsg);
       }else{
         showToast(context, '下单成功');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context){
+            return OrderList(initIndex: 0,);
+          })
+        );
       }
     });
   }
