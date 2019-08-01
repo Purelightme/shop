@@ -98,7 +98,7 @@ class _CategoryIndexState extends State<CategoryIndex> {
                     onPressed: (){
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (context){
-                          return ProductList(isAutoFocus: false,);
+                          return ProductList(categoryId: last.id,);
                         })
                       );
                     },

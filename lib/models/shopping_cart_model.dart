@@ -29,10 +29,10 @@ class Data {
   int from;
   int lastPage;
   String lastPageUrl;
-  Null nextPageUrl;
+  String nextPageUrl;
   String path;
   int perPage;
-  Null prevPageUrl;
+  String prevPageUrl;
   int to;
   int total;
 
@@ -62,10 +62,14 @@ class Data {
     from = json['from'];
     lastPage = json['last_page'];
     lastPageUrl = json['last_page_url'];
-    nextPageUrl = json['next_page_url'];
+    if(json['next_page_url'] != null){
+      nextPageUrl = json['next_page_url'];
+    }
     path = json['path'];
     perPage = json['per_page'];
-    prevPageUrl = json['prev_page_url'];
+    if(json['prev_page_url'] != null){
+      prevPageUrl = json['prev_page_url'];
+    }
     to = json['to'];
     total = json['total'];
   }

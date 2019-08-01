@@ -7,10 +7,14 @@ import 'package:shop/category/category_index.dart';
 import 'package:shop/category/product/product_detail.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop/category/product/product_list.dart';
+import 'package:shop/category/search/search.dart';
 import 'package:shop/common/common.dart';
+import 'package:shop/common/notification.dart';
 import 'package:shop/models/banner_model.dart' as bm;
 import 'package:shop/models/index_category.dart' as ic;
 import 'package:shop/models/hot_product_model.dart' as hp;
+import 'package:shop/models/index_suggest_model.dart' as index_suggest;
+import 'package:shop/utils/token.dart';
 
 class Index extends StatefulWidget {
   @override
@@ -23,18 +27,54 @@ class _indexState extends State<Index> {
 
   List<hp.Data> _hots = [];
 
-  List<int> items = [0,1,2,3,4,5,6,7,8,9];
-
-  List<int> hots = [0,1,2,3,4,5];
-
+  List<index_suggest.Item> _iterms = [];
+  bool _hasMore = true;
+  int _page = 0;
+  
   ic.IndexCategory _indexCategory;
 
-  Future _addMoreData()async{
-    Future.delayed(Duration(microseconds: 1),(){
-      setState(() {
-        items.addAll(items.reversed.toList());
-      });
+  _fetchNextPageIndexSuggest()async{
+    if(!_hasMore){
+      showToast(context,'没有更多啦~');
+      return;
+    }
+    setState(() {
+      _page++;
     });
+    String token = await getToken();
+    if(token.isNotEmpty){
+      http.get(api_prefix + '/product/index-suggests?page=$_page',headers: {
+        'Authorization':'Bearer $token'
+      }).then((res){
+        index_suggest.IndexSuggestModel _indexSuggestModel = index_suggest.IndexSuggestModel.fromJson(json.decode(res.body));
+        if(_indexSuggestModel.data.perPage > _indexSuggestModel.data.data.length){
+          setState(() {
+            _hasMore = false;
+            _iterms.addAll(_indexSuggestModel.data.data);
+          });
+        }else{
+          setState(() {
+            _hasMore = true;
+            _iterms.addAll(_indexSuggestModel.data.data);
+          });
+        }
+      });
+    }else{
+      http.get(api_prefix + '/product/index-suggests?page=$_page').then((res){
+        index_suggest.IndexSuggestModel _indexSuggestModel = index_suggest.IndexSuggestModel.fromJson(json.decode(res.body));
+        if(_indexSuggestModel.data.perPage > _indexSuggestModel.data.data.length){
+          setState(() {
+            _hasMore = false;
+            _iterms.addAll(_indexSuggestModel.data.data);
+          });
+        }else{
+          setState(() {
+            _hasMore = true;
+            _iterms.addAll(_indexSuggestModel.data.data);
+          });
+        }
+      });
+    }
   }
 
   ScrollController _scrollController = new ScrollController();
@@ -49,7 +89,7 @@ class _indexState extends State<Index> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Image.network(data.imageCover, fit: BoxFit.cover,),
+              Image.network(data.imageCover, fit: BoxFit.cover,height: 160,),
               Expanded(
                   child: GestureDetector(
                     child: Padding(
@@ -82,7 +122,7 @@ class _indexState extends State<Index> {
     );
   }
 
-  Widget _buildSuggestItem(int index){
+  Widget _buildSuggestItem(index_suggest.Item item){
     return GestureDetector(
       child: Container(
         padding: EdgeInsets.all(10),
@@ -97,7 +137,7 @@ class _indexState extends State<Index> {
           children: <Widget>[
             Container(
               width: 150,
-              child: Image.asset('images/banners/watch.jpeg',fit: BoxFit.cover,),
+              child: Image.network(item.imageCover,fit: BoxFit.cover,),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,11 +145,11 @@ class _indexState extends State<Index> {
                 Container(
                   margin: EdgeInsets.only(left: 10),
                   width: MediaQuery.of(context).size.width-180,
-                  child: Text('鲜伶伶越南香芋芒果新鲜水果4斤鲜伶伶越南香芋芒果新鲜水果4斤鲜伶伶越南香芋芒果新鲜水果4斤',softWrap: true,maxLines: 2,overflow: TextOverflow.ellipsis,),
+                  child: Text(item.longTitle,softWrap: true,maxLines: 2,overflow: TextOverflow.ellipsis,),
                 ),
                 Container(
                   padding: EdgeInsets.all(10),
-                  child: Text('\$9.99',style: TextStyle(
+                  child: Text('￥${item.price}',style: TextStyle(
                       fontSize: 20,
                       color: Colors.redAccent
                   ),),
@@ -128,39 +168,40 @@ class _indexState extends State<Index> {
                                   width: 40,
                                   child: Stack(
                                     children: <Widget>[
+                                      item.buyers.avatars.length > 0 ?
                                       Container(
                                         width: 20,
                                         height: 20,
                                         child: CircleAvatar(
-                                            backgroundImage: AssetImage(
-                                                'images/banners/kuzi.jpeg')),
-                                      ),
+                                            backgroundImage: NetworkImage(item.buyers.avatars[0])),
+                                      ) : Container(),
+                                      item.buyers.avatars.length > 1 ?
                                       Positioned(
                                         left: 10,
                                         child: Container(
                                           width: 20,
                                           height: 20,
                                           child: CircleAvatar(
-                                              backgroundImage: AssetImage(
-                                                  'images/banners/kuzi.jpeg')),
+                                              backgroundImage: NetworkImage(item.buyers.avatars[1])),
                                         ),
-                                      ),
+                                      ) : Container(),
+                                      item.buyers.avatars.length > 2 ?
                                       Positioned(
                                         left: 20,
                                         child: Container(
                                           width: 20,
                                           height: 20,
                                           child: CircleAvatar(
-                                              backgroundImage: AssetImage(
-                                                  'images/banners/kuzi.jpeg')),
+                                              backgroundImage: NetworkImage(item.buyers.avatars[2])),
                                         ),
-                                      ),
+                                      ) : Container(),
                                     ],
                                   ),
                                 ),
                                 Container(
                                   margin: EdgeInsets.only(left: 5),
-                                  child: Text('109人已购买', style: TextStyle(
+                                  child: Text(item.buyers.total > 0 ? item.buyers.total.toString() + '人已购买' : 
+                                    '等你来买呀', style: TextStyle(
                                       color: Colors.grey
                                   ),),
                                 )
@@ -192,7 +233,9 @@ class _indexState extends State<Index> {
         ),
       ),
       onTap: (){
-        Navigator.of(context).pushNamed('/product_detail');
+        Navigator.of(context).push(MaterialPageRoute(builder: (context){
+          return ProductDetail(ProductId: item.id,);
+        }));
       },
     );
   }
@@ -252,14 +295,14 @@ class _indexState extends State<Index> {
     return GestureDetector(
       child: Column(
         children: <Widget>[
-          Image.network(data.imageCover),
+          Image.network(data.imageCover,height: 60,),
           Text(data.title)
         ],
       ),
       onTap: (){
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context){
-            return new ProductList(isAutoFocus: false,);
+            return new ProductList(categoryId: data.id,);
           })
         );
       },
@@ -273,7 +316,7 @@ class _indexState extends State<Index> {
         margin: EdgeInsets.symmetric(horizontal: 5.0),
         decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(10.0))),
-        child: Image.network(data.imageCover),
+        child: Image.network(data.imageCover,height: 100,),
       ),
       onTap: (){
         if(data.productId != null){
@@ -320,8 +363,7 @@ class _indexState extends State<Index> {
     _scrollController.addListener((){
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        _addMoreData();
-        print('我监听到底部了!');
+        _fetchNextPageIndexSuggest();
       }
     });
     //获取banners
@@ -346,6 +388,7 @@ class _indexState extends State<Index> {
       });
     });
     super.initState();
+    _fetchNextPageIndexSuggest();
   }
 
   @override
@@ -385,7 +428,8 @@ class _indexState extends State<Index> {
             onTap: (){
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (context){
-                  return new ProductList(isAutoFocus: true);
+//                  return new ProductList(isAutoFocus: true);
+                return new Search();
                 })
               );
             },
@@ -452,7 +496,7 @@ class _indexState extends State<Index> {
             ],
           ),
           Column(
-            children: items.map((index) => _buildSuggestItem(index)).toList()
+            children: _iterms.map((item) => _buildSuggestItem(item)).toList()
           )
         ],
       ),

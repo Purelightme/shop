@@ -8,15 +8,15 @@ import 'package:shop/common/notification.dart';
 import 'package:shop/models/address_model.dart' as am;
 import 'package:shop/models/common_res_model.dart';
 import 'package:shop/models/product_specification_model.dart';
-import 'package:shop/my/order/order_detail.dart';
 import 'package:shop/my/order/order_list.dart';
 import 'package:shop/utils/token.dart';
 
 class OrderCheck extends StatefulWidget {
 
-  OrderCheck({@required this.ProductSpecificationId});
+  OrderCheck({@required this.ProductSpecificationId,@required this.Number});
 
   int ProductSpecificationId;
+  int Number;
 
   @override
   _OrderCheck createState() => _OrderCheck();
@@ -27,7 +27,7 @@ class _OrderCheck extends State<OrderCheck> {
   TextEditingController _controller = new TextEditingController();
 
   Data _data;
-  int _num = 1;
+  int _num;
   List<am.Data> _addresses = [];
   int _selectedAddressIndex;
   String _remark = '';
@@ -35,9 +35,15 @@ class _OrderCheck extends State<OrderCheck> {
   @override
   initState(){
     super.initState();
-    print(widget.ProductSpecificationId);
     _loadProductSpecification();
     _initAddress();
+    _setNumber();
+  }
+
+  _setNumber(){
+    setState(() {
+      _num = widget.Number;
+    });
   }
 
   _loadProductSpecification(){
@@ -81,17 +87,25 @@ class _OrderCheck extends State<OrderCheck> {
         context: context,
         barrierDismissible: false,
         child: SimpleDialog(
-          title: Text('选择收货地址'),
+          title: Text('亲，选择收货地址~'),
           children: _addresses.asMap().map((int i,am.Data data){
             return MapEntry(i,SimpleDialogOption(
               child: Container(
                   child:  Container(
-                      color: Colors.redAccent,
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       margin: EdgeInsets.only(top: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.only(right: 10),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.blue,
+                              child: Text(data.name.substring(0,1),style: TextStyle(
+                                  color: Colors.white
+                              ),),
+                            ),
+                          ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
@@ -102,8 +116,19 @@ class _OrderCheck extends State<OrderCheck> {
                                 width: MediaQuery
                                     .of(context)
                                     .size
-                                    .width * 0.6,
-                                child: Text('${data.province} ${data.city} ${data.area} ${data.street}',
+                                    .width * 0.4,
+                                child: Text('${data.province} ${data.city} ${data.area}',
+                                  softWrap: true,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Container(
+                                width: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width * 0.4,
+                                child: Text(data.street,
                                   softWrap: true,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -130,6 +155,10 @@ class _OrderCheck extends State<OrderCheck> {
   _createOrder()async{
     print(_remark);
     String token = await getToken();
+    if(token.isEmpty){
+      showToast(context, '请先登录~',duration: 3);
+      return;
+    }
     http.post(api_prefix+'/orders',headers: {
       'Authorization':'Bearer $token'
     },body: {
@@ -184,6 +213,7 @@ class _OrderCheck extends State<OrderCheck> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset:false,
       appBar: AppBar(
         title: Text('立即购买'),
       ),
@@ -199,7 +229,10 @@ class _OrderCheck extends State<OrderCheck> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Icon(Icons.place),
+                        Padding(
+                          child: Icon(Icons.place,color: Colors.blue,),
+                          padding: EdgeInsets.only(left: 10),
+                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -216,7 +249,7 @@ class _OrderCheck extends State<OrderCheck> {
                             ),
                           ],
                         ),
-                        Icon(Icons.arrow_forward_ios,size: 18,color: Colors.grey,),
+                        Icon(Icons.arrow_forward_ios,size: 18,color: Colors.blue,),
                       ],
                     ),
                   ),
@@ -226,9 +259,6 @@ class _OrderCheck extends State<OrderCheck> {
                 ) : Container(),
                 commonDivider(opacity: 0.1),
                 Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.1)
-                  ),
                   child: _data != null ? Row(
                     children: <Widget>[
                       Padding(
@@ -250,7 +280,12 @@ class _OrderCheck extends State<OrderCheck> {
                           Text('规格：${_data.specificationString}',style: TextStyle(
                             color: Colors.grey
                           ),),
-                          Text('￥${_data.price}')
+                          Text('单价：￥${_data.price}',style: TextStyle(
+                            color: Colors.grey
+                          ),),
+                          Text('运费：￥${_data.expressFee}',style: TextStyle(
+                            color: Colors.grey
+                          ),),
                         ],
                       ),
                     ],
@@ -265,40 +300,30 @@ class _OrderCheck extends State<OrderCheck> {
                       Text('购买数量'),
                       Row(
                         children: <Widget>[
-                          GestureDetector(
-                            child: Container(
-                              width: 25,
-                              height: 25,
-                              color: Colors.grey.withOpacity(0.5),
-                              child: Icon(Icons.remove),
+                           FlatButton(
+                             child: Icon(Icons.remove,size: 20,),
+                             onPressed: (){
+                                 if(_num > 1){
+                                   setState(() {
+                                     _num--;
+                                   });
+                               }
+                             },
                             ),
-                            onTap: (){
-                              if(_num > 1){
-                                setState(() {
-                                  _num--;
-                                });
-                              }
-                            },
-                          ),
                           Container(
                             padding: EdgeInsets.all(10),
                             child: Text(_num.toString()),
                           ),
-                          GestureDetector(
-                            child: Container(
-                              width: 25,
-                              height: 25,
-                              color: Colors.grey.withOpacity(0.2),
-                              child: Icon(Icons.add),
-                            ),
-                            onTap: (){
+                          FlatButton(
+                            child: Icon(Icons.add,size: 20,),
+                            onPressed: (){
                               if(_num < 20){
                                 setState(() {
                                   _num++;
                                 });
                               }
                             },
-                          )
+                          ),
                         ],
                       )
                     ],

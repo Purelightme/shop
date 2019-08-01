@@ -4,9 +4,12 @@ import 'package:shop/api/api.dart';
 import 'package:shop/authenticate/register.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop/common/notification.dart';
+import 'package:shop/index/index.dart';
 import 'package:shop/models/user_model.dart';
 import 'package:shop/my/my_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../main.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -31,7 +34,6 @@ class _LoginState extends State<Login> {
         'email':email,
         'password':password
       }).then((res)async{
-        print(json.decode(res.body));
         setState(() {
           _userModel = UserModel.fromJson(json.decode(res.body));
         });
@@ -40,13 +42,8 @@ class _LoginState extends State<Login> {
         }else{
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', _userModel.data.token);
-          Navigator.of(context).push(MaterialPageRoute(builder: (context){
-            return Scaffold(
-              appBar: AppBar(
-                title: Text('一个小店'),
-              ),
-              body: MyIndex(),
-            );
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context){
+            return MyApp();
           }));
         }
       });

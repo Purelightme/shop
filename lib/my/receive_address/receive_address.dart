@@ -81,8 +81,10 @@ class _ReceiveAddressState extends State<ReceiveAddress> {
               child: Text('当前默认',style: TextStyle(color: Colors.redAccent),),
             ) : Container(),
             CircleAvatar(
+              backgroundColor: Colors.blue,
               child: Text(data.name.substring(0,1),style: TextStyle(
                 fontSize: 14,
+                color: Colors.white
               ),),
             ),
             Container(

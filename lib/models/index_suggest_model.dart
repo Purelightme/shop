@@ -1,11 +1,11 @@
-class ProductListModel {
+class IndexSuggestModel {
   int errcode;
   String errmsg;
   Data data;
 
-  ProductListModel({this.errcode, this.errmsg, this.data});
+  IndexSuggestModel({this.errcode, this.errmsg, this.data});
 
-  ProductListModel.fromJson(Map<String, dynamic> json) {
+  IndexSuggestModel.fromJson(Map<String, dynamic> json) {
     errcode = json['errcode'];
     errmsg = json['errmsg'];
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
@@ -24,7 +24,7 @@ class ProductListModel {
 
 class Data {
   int currentPage;
-  List<Iterm> data;
+  List<Item> data;
   String firstPageUrl;
   int from;
   int lastPage;
@@ -53,9 +53,9 @@ class Data {
   Data.fromJson(Map<String, dynamic> json) {
     currentPage = json['current_page'];
     if (json['data'] != null) {
-      data = new List<Iterm>();
+      data = new List<Item>();
       json['data'].forEach((v) {
-        data.add(new Iterm.fromJson(v));
+        data.add(new Item.fromJson(v));
       });
     }
     firstPageUrl = json['first_page_url'];
@@ -94,35 +94,52 @@ class Data {
   }
 }
 
-class Iterm {
+class Item {
   int id;
   String imageCover;
-  String shortTitle;
+  String longTitle;
   String price;
-  String sellingPoint;
+  Buyers buyers;
 
-  Iterm(
-      {this.id,
-        this.imageCover,
-        this.shortTitle,
-        this.price,
-        this.sellingPoint});
+  Item({this.id, this.imageCover, this.longTitle, this.price, this.buyers});
 
-  Iterm.fromJson(Map<String, dynamic> json) {
+  Item.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     imageCover = json['image_cover'];
-    shortTitle = json['short_title'];
+    longTitle = json['long_title'];
     price = json['price'];
-    sellingPoint = json['selling_point'];
+    buyers =
+    json['buyers'] != null ? new Buyers.fromJson(json['buyers']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['image_cover'] = this.imageCover;
-    data['short_title'] = this.shortTitle;
+    data['long_title'] = this.longTitle;
     data['price'] = this.price;
-    data['selling_point'] = this.sellingPoint;
+    if (this.buyers != null) {
+      data['buyers'] = this.buyers.toJson();
+    }
+    return data;
+  }
+}
+
+class Buyers {
+  int total;
+  List<String> avatars;
+
+  Buyers({this.total, this.avatars});
+
+  Buyers.fromJson(Map<String, dynamic> json) {
+    total = json['total'];
+    avatars = json['avatars'].cast<String>();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['total'] = this.total;
+    data['avatars'] = this.avatars;
     return data;
   }
 }

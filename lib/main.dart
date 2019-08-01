@@ -26,7 +26,6 @@ class _MyAppState extends State<MyApp> {
   final List<Widget> _children = [
     new Index(),
     new CategoryIndex(),
-//    new DynamicIndex(),
     new ActivityIndex(),
     new MyIndex()
   ];

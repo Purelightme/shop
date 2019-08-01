@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:shop/api/api.dart';
@@ -55,6 +56,7 @@ class _MyIndexState extends State<MyIndex> {
   num waitPays = 0;
   num waitReceives = 0;
   num waitComments = 0;
+  File _image;
 
   @override
   void initState() {
@@ -70,6 +72,7 @@ class _MyIndexState extends State<MyIndex> {
       http.get(api_prefix + '/user/info',headers: {
         'Authorization':'Bearer ' + token
       }).then((res){
+        print(res.body);
         setState(() {
           _userModel = UserModel.fromJson(json.decode(res.body));
           _isLogined = true;
@@ -104,14 +107,18 @@ class _MyIndexState extends State<MyIndex> {
             onPressed: (){
               Navigator.of(context).push(MaterialPageRoute(builder: (context){
                 return Profile(userModel: _userModel,);
-              }));
+              })).then((res)async{
+                if(res == 'refresh'){
+                  _getBaseInfo();
+                }
+              });
             },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(left: 12.0,right: 15.0),
-                  child: Image.network(_userModel.data.avatar,width: 70.0,height: 70.0,),
+                  child: _image != null ? Image.file(_image,width: 70.0,height: 70.0,) : Image.network(_userModel.data.avatar,width: 70.0,height: 70.0,),
                 ),
                 Expanded(
                   child: Column(
@@ -131,7 +138,7 @@ class _MyIndexState extends State<MyIndex> {
                 ),
                 Container(
                   margin: EdgeInsets.only(left: 12.0,right: 15.0),
-                  child: Image.network(_userModel.data.avatar,width: 24.0,height: 24.0,),
+                  child: _image != null ? Image.file(_image,width: 24.0,height: 24.0,) : Image.network(_userModel.data.avatar,width: 24.0,height: 24.0,),
                 ),
               ],
             ),

@@ -175,7 +175,7 @@ class _UpdateAddressState extends State<UpdateAddress> {
               onPressed: (){
                 _updateAddress();
               },
-              child: Text('确认添加',style: TextStyle(
+              child: Text('保存',style: TextStyle(
                   fontSize: 18.0,
                   color: Colors.white
               ),),

@@ -9,6 +9,7 @@ import 'package:shop/common/notification.dart';
 import 'package:shop/models/common_res_model.dart';
 import 'package:shop/models/double_specification_product_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop/models/relate_suggest_model.dart' as suggest;
 import 'package:shop/models/single_specification_product_model.dart';
 import 'package:shop/utils/token.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
@@ -39,6 +40,7 @@ class _ProductDetailState extends State<ProductDetail> {
   int _selectedProductSpecification;
   int _number = 1;
   PersistentBottomSheetController bottomSheetController = null;
+  suggest.RelateSuggestModel _relateSuggestModel;
 
   CarouselSlider getFullScreenCarousel(BuildContext mediaContext) {
     return CarouselSlider(
@@ -81,6 +83,78 @@ class _ProductDetailState extends State<ProductDetail> {
         }
       });
     });
+    _getRelateSuggest();
+  }
+
+  _getRelateSuggest(){
+    http.get(api_prefix + '/product/relate-suggests?product_id=${widget.ProductId}').then((res){
+      setState(() {
+        _relateSuggestModel = suggest.RelateSuggestModel.fromJson(json.decode(res.body));
+      });
+    });
+  }
+
+  List<Widget> _buildSuggest(){
+    return _relateSuggestModel.data.map((suggest.Data data){
+      return GestureDetector(
+        child: Container(
+            decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(
+                    color: Colors.white,
+                    width: 1
+                ),
+                borderRadius: BorderRadius.all(Radius.circular(2))
+            ),
+            child: Column(
+              children: <Widget>[
+                Image.network(data.imageCover,height: 50,),
+                Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text(data.shortTitle),
+                ),
+                Divider(indent: 2,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      child: Text('\￥${data.price}',style: TextStyle(
+                          color: Colors.redAccent
+                      ),),
+                    ),
+                    data.sellingPoint.isNotEmpty ?
+                    Expanded(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: data.sellingPoint.split(',').map((str) => Container(
+                            margin: EdgeInsets.all(1),
+                            child: Text(str,style: TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 10
+                            ),),
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Colors.redAccent,
+                                    width: 1
+                                )
+                            ),
+                            padding: EdgeInsets.all(1),
+                          )).toList()
+                      ),
+                    ) : Container()
+                  ],
+                )
+              ],
+            )
+        ),
+        onTap: (){
+          Navigator.of(context).push(MaterialPageRoute(builder: (context){
+            return new ProductDetail(ProductId: data.id,);
+          }));
+        },
+      );
+    }).toList();
   }
   
   _buildCommentItem(item){
@@ -485,7 +559,7 @@ class _ProductDetailState extends State<ProductDetail> {
 
   _toOrderCheck(){
     Navigator.of(context).push(MaterialPageRoute(builder: (context){
-      return OrderCheck(ProductSpecificationId: _selectedProductSpecification,);
+      return OrderCheck(ProductSpecificationId: _selectedProductSpecification,Number: _number,);
     }));
   }
 
@@ -792,14 +866,16 @@ class _ProductDetailState extends State<ProductDetail> {
                     ),
                     Column(
                       children: _doubleSpecificationProductModel.data.details.map((url){
-                        return Image.network(url);
+                        return Image.network(url,width: MediaQuery.of(context).size.width,);
                       }).toList(),
                     ),
                     commonDivider(),
+                    _relateSuggestModel.data.length > 0 ?
                     Container(
                       padding: EdgeInsets.all(10),
                       child: Text('相关推荐'),
-                    ),
+                    ) : Container(),
+                    _relateSuggestModel.data.length > 0 ?
                     Container(
                       padding: EdgeInsets.all(10),
                       child: GridView.count(
@@ -808,22 +884,9 @@ class _ProductDetailState extends State<ProductDetail> {
                         shrinkWrap: true,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
-                        children: <Widget>[
-                          Container(
-                            height: 100,
-                            color: Colors.redAccent,
-                          ),
-                          Container(
-                            height: 100,
-                            color: Colors.blueGrey,
-                          ),
-                          Container(
-                            height: 100,
-                            color: Colors.pink,
-                          ),
-                        ],
+                        children: _buildSuggest()
                       ),
-                    )
+                    ) : Container(),
                   ],
                 ),
                 Positioned(
