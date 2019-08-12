@@ -9,9 +9,10 @@ import 'package:shop/models/common_res_model.dart';
 import 'package:shop/models/order_list_model.dart';
 import 'package:shop/utils/token.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
-import 'package:flutter_multiple_image_picker/flutter_multiple_image_picker.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:photo/photo.dart';
+import 'package:photo_manager/photo_manager.dart';
+
 
 
 class OrderComment extends StatefulWidget {
@@ -33,41 +34,48 @@ class _OrderCommentState extends State<OrderComment> {
 
   _chooseImages()async{
     List resultList;
-    try {
-      resultList = await FlutterMultipleImagePicker.pickMultiImages(9, false);
-    } on PlatformException catch (e) {
-      showToast(context,e.message);
+
+      resultList = await PhotoPicker.pickAsset(
+        context: context,
+        maxSelected: 9,
+        pickType: PickType.onlyImage,
+        rowCount: 4,
+        padding: 3,
+        thumbSize: 400
+      );
+    if(resultList == null){
+      //没有选择
       return;
     }
+    List<String> imgList = [];
+    for(var e in resultList){
+      var file = await e.file;
+      imgList.add(file.absolute.path);
+    }
     setState(() {
-      images = new List.from(resultList);
+      images = new List.from(imgList);
     });
   }
 
   _renderImages(){
     return images == null ? Container() :
         Wrap(
-          spacing: 20,
-          runSpacing: 4,
+          spacing: 2,
+          runSpacing: 2,
           direction: Axis.horizontal,
           alignment: WrapAlignment.start,
           children: images.asMap().map((int index,file){
             return MapEntry(index, Stack(
                   children: <Widget>[
-                    Image.file(new File(images[index].toString()),
-                      width: 60,
-                      height: 60,),
-                    Positioned(
-                        top: -10,
-                        right: -20,
-                        child: IconButton(
-                          icon: Icon(Icons.close,size: 20,),
-                          onPressed: () {
-                            setState(() {
-                              images.removeAt(index);
-                            });
-                          },
-                        )
+                    GestureDetector(
+                      child: Image.file(new File(images[index].toString()),
+                        width: 100,
+                        height: 100,),
+                      onTap: (){
+                        setState(() {
+                          images.removeAt(index);
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -77,8 +85,6 @@ class _OrderCommentState extends State<OrderComment> {
   }
 
   _comment()async{
-
-    print(images);
 
     Map<String,dynamic> data;
     if(content == null){
@@ -128,6 +134,7 @@ class _OrderCommentState extends State<OrderComment> {
         title: Text('评论'),
       ),
       body: Container(
+        color: Colors.grey.withOpacity(0.1),
         child: ListView(
           children: <Widget>[
             ...widget.specificationSnapshot.map((SpecificationSnapshot sp){
@@ -150,39 +157,6 @@ class _OrderCommentState extends State<OrderComment> {
             Divider(),
             Container(
               padding: EdgeInsets.all(10),
-              child: TextField(
-                maxLines: null,
-                autofocus: true,
-                minLines: 5,
-                keyboardType: TextInputType.multiline,
-                decoration: new InputDecoration(
-                  hintText: '评点什么吧~',
-                ),
-                onChanged: (value){
-                  setState(() {
-                    content = value;
-                  });
-                },
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.add_photo_alternate,
-                    size: 40,
-                    color: Colors.pinkAccent,
-                  ),
-                  onPressed: () {
-                    _chooseImages();
-                  },
-                )
-              ],
-            ),
-            _renderImages(),
-            Divider(),
-            Container(
-              padding: EdgeInsets.all(10),
               child: Row(
                 children: <Widget>[
                   Icon(Icons.store,color: Colors.redAccent.withOpacity(0.8),),
@@ -193,28 +167,104 @@ class _OrderCommentState extends State<OrderComment> {
                 ],
               ),
             ),
+            Row(
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: SmoothStarRating(
+                      allowHalfRating: false,
+                      onRatingChanged: (v) {
+                        setState(() {
+                          rating = v;
+                        });
+                      },
+                      starCount: 5,
+                      rating: rating,
+                      size: 30.0,
+                      color: Colors.redAccent,
+                      borderColor: Colors.grey,
+                      spacing: 5.0
+                  ),
+                ),
+                Container(
+                  child: Text(rating.toString()),
+                )
+              ],
+            ),
+            Divider(),
             Container(
-              margin: EdgeInsets.all(10),
-              child: SmoothStarRating(
-                  allowHalfRating: false,
-                  onRatingChanged: (v) {
-                    setState(() {
-                      rating = v;
-                    });
-                  },
-                  starCount: 5,
-                  rating: rating,
-                  size: 30.0,
-                  color: Colors.redAccent,
-                  borderColor: Colors.grey,
-                  spacing: 5.0
+              padding: EdgeInsets.all(10),
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.text_fields,color: Colors.redAccent.withOpacity(0.8),),
+                  Container(
+                    padding: EdgeInsets.only(left: 10),
+                    child: Text('评论内容'),
+                  )
+                ],
               ),
+            ),
+            Container(
+              padding: EdgeInsets.all(10),
+              child: TextField(
+                maxLines: null,
+                autofocus: true,
+                minLines: 5,
+                keyboardType: TextInputType.multiline,
+                decoration: new InputDecoration(
+                  hintText: '评点什么吧~',
+                  border: InputBorder.none
+                ),
+                onChanged: (value){
+                  setState(() {
+                    content = value;
+                  });
+                },
+              ),
+            ),
+            Divider(),
+            Container(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.image,color: Colors.redAccent.withOpacity(0.8),),
+                  Container(
+                    padding: EdgeInsets.only(left: 10),
+                    child: Text('图片(可选)'),
+                  )
+                ],
+              ),
+            ),
+            GestureDetector(
+              child: Container(
+                padding: EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(Icons.image,
+                      size: 50,
+                      color: Colors.blueAccent,
+                    ),
+                    Text('点我选择')
+                  ],
+                ),
+              ),
+              onTap: (){
+                _chooseImages();
+              },
+            ),
+            _renderImages(),
+            Container(
+              padding: EdgeInsets.all(10),
+              child: Text('tips：点击图片可移除',style: TextStyle(
+                color: Colors.grey
+              ),),
             ),
             SizedBox(
               width: 340.0,
               height: 42.0,
               child: RaisedButton(
-                color: Color(0xffff1644),
+                color: Colors.redAccent,
                 onPressed: (){
                   _comment();
                 },

@@ -1,4 +1,4 @@
-package com.example.shop;
+package com.bettertaro.shop;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

@@ -2,9 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
-import 'package:image_picker_saver/image_picker_saver.dart';
+//import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/api/api.dart';
 import 'package:shop/common/notification.dart';
@@ -12,7 +10,6 @@ import 'package:shop/common/touch_callback.dart';
 import 'package:shop/models/common_res_model.dart';
 import 'package:shop/models/user_model.dart';
 import 'package:shop/my/profile/update_nickname.dart';
-import 'package:http/http.dart' as http;
 
 
 class Profile extends StatefulWidget {
@@ -48,9 +45,11 @@ class _ProfileState extends State<Profile> {
 
     Dio dio = new Dio();
     Options options = Options(headers: {
-      'Authorization':'Bearer ' + token
+      'Authorization':'Bearer ' + token,
+      'X-Requested-With':'XMLHttpRequest'
     });
     dio.post<String>(api_prefix + '/user/update', data: formData,options: options).then((res){
+      print(res.data);
       setState(() {
         _isLoading = false;
       });
@@ -65,6 +64,13 @@ class _ProfileState extends State<Profile> {
       }
     });
 
+  }
+
+  _logout()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('token');
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 
   @override
@@ -94,7 +100,7 @@ class _ProfileState extends State<Profile> {
                                   ),
                                 ),
                                 onTap: (){
-                                  Navigator.of(context).pop();
+                                  _logout();
                                 },
                               )
                             ],
@@ -120,6 +126,7 @@ class _ProfileState extends State<Profile> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           CircleAvatar(
+                            foregroundColor: Colors.redAccent,
                             backgroundImage: _image == null ?
                             NetworkImage(widget.userModel.data.avatar) :
                             FileImage(_image),
@@ -141,10 +148,10 @@ class _ProfileState extends State<Profile> {
                               leading: new Icon(Icons.photo_camera),
                               title: new Text("拍照"),
                               onTap: () async {
-                                File image = await ImagePickerSaver.pickImage(
-                                    source: ImageSource.camera
-                                );
-                                _updateAvatar(image);
+//                                File image = await ImagePickerSaver.pickImage(
+//                                    source: ImageSource.camera
+//                                );
+//                                _updateAvatar(image);
                                 Navigator.pop(context);
                               },
                             ),
@@ -152,10 +159,10 @@ class _ProfileState extends State<Profile> {
                               leading: new Icon(Icons.photo_library),
                               title: new Text("相册"),
                               onTap: () async {
-                                File image = await ImagePickerSaver.pickImage(
-                                    source: ImageSource.gallery
-                                );
-                                _updateAvatar(image);
+//                                File image = await ImagePickerSaver.pickImage(
+//                                    source: ImageSource.gallery
+//                                );
+//                                _updateAvatar(image);
                                 Navigator.pop(context);
                               },
                             ),

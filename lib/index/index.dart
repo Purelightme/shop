@@ -173,6 +173,7 @@ class _indexState extends State<Index> {
                                         width: 20,
                                         height: 20,
                                         child: CircleAvatar(
+                                          foregroundColor: Colors.redAccent,
                                             backgroundImage: NetworkImage(item.buyers.avatars[0])),
                                       ) : Container(),
                                       item.buyers.avatars.length > 1 ?
@@ -182,6 +183,7 @@ class _indexState extends State<Index> {
                                           width: 20,
                                           height: 20,
                                           child: CircleAvatar(
+                                              foregroundColor: Colors.redAccent,
                                               backgroundImage: NetworkImage(item.buyers.avatars[1])),
                                         ),
                                       ) : Container(),
@@ -192,6 +194,7 @@ class _indexState extends State<Index> {
                                           width: 20,
                                           height: 20,
                                           child: CircleAvatar(
+                                              foregroundColor: Colors.redAccent,
                                               backgroundImage: NetworkImage(item.buyers.avatars[2])),
                                         ),
                                       ) : Container(),

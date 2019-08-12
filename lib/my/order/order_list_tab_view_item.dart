@@ -42,6 +42,7 @@ class _OrderListTabViewItemState extends State<OrderListTabViewItem> with Automa
             child: Row(
               children: <Widget>[
                 CircleAvatar(
+                  foregroundColor: Colors.redAccent,
                   backgroundImage: NetworkImage(sp.imageCover),
                 ),
                 Container(
@@ -167,7 +168,7 @@ class _OrderListTabViewItemState extends State<OrderListTabViewItem> with Automa
   }
 
   _receive(int index)async{
-    showDialog(
+    switch(await showDialog(
         context: context,
         child: AlertDialog(
           title: Text('确认收货'),
@@ -187,12 +188,13 @@ class _OrderListTabViewItemState extends State<OrderListTabViewItem> with Automa
             )
           ],
         )
-    ).then((value)async{
-      if(value == 'ok'){
+    )){
+      case 'ok':
         String token = await getToken();
         http.put(api_prefix+'/orders/${_items[index].id}/receive',headers: {
           'Authorization':'Bearer $token'
         }).then((res){
+          print(res.body);
           CommonResModel _commonResModel = CommonResModel.fromJson(json.decode(res.body));
           if(_commonResModel.errcode != 0){
             showToast(context, _commonResModel.errmsg);
@@ -204,8 +206,12 @@ class _OrderListTabViewItemState extends State<OrderListTabViewItem> with Automa
             });
           }
         });
-      }
-    });
+        break;
+      case 'cancel':
+
+        break;
+    }
+    return;
   }
 
   List<Widget> _buildBtns(int index) {

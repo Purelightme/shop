@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:shop/api/api.dart';
 import 'package:shop/category/product/product_detail.dart';
 import 'package:shop/common/common.dart';
+import 'package:shop/common/image_preview.dart';
 import 'package:shop/common/notification.dart';
 import 'package:shop/common/touch_callback.dart';
 import 'package:shop/models/order_detail_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop/utils/token.dart';
+import 'package:smooth_star_rating/smooth_star_rating.dart';
 
 import 'express_detail.dart';
 
@@ -31,6 +33,14 @@ class _OrderDetailState extends State<OrderDetail> {
   initState(){
     super.initState();
     _getOrderDetail();
+  }
+
+  _toPreview(List<String> images,index){
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context){
+          return ImagePreview(images: images,index: index);
+        })
+    );
   }
 
   _getOrderDetail()async{
@@ -63,6 +73,7 @@ class _OrderDetailState extends State<OrderDetail> {
               child: Row(
                 children: <Widget>[
                   CircleAvatar(
+                    foregroundColor: Colors.redAccent,
                     backgroundImage: NetworkImage(ss.imageCover,),
                   ),
                   Container(
@@ -166,6 +177,71 @@ class _OrderDetailState extends State<OrderDetail> {
     );
   }
 
+  Widget _buildComment(){
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.all(10),
+          child: Text('评论详情'),
+        ),
+        Container(
+          padding: EdgeInsets.all(10),
+          color: Colors.grey.withOpacity(0.1),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Container(
+                    child: Text(orderDetailModel.data.comment.createdAt),
+                  ),
+                  SmoothStarRating(
+                    allowHalfRating: true,
+                    onRatingChanged: null,
+                    starCount: 5,
+                    rating: orderDetailModel.data.comment.star.toDouble(),
+                    size: 20.0,
+                    color: Colors.redAccent,
+                    borderColor: Colors.grey,
+                  )
+                ],
+              ),
+              Container(
+                child: Text(orderDetailModel.data.comment.content,style: TextStyle(
+                    fontSize: 16
+                ),),
+              ),
+              orderDetailModel.data.comment.imgs.length == 0 ? Container() :
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Divider(),
+                  Container(
+                    child: Wrap(
+                      spacing: 2,
+                      runSpacing: 2,
+                      children: orderDetailModel.data.comment.imgs.asMap().map((index,url){
+                        return MapEntry(index,GestureDetector(
+                          child: Image.network(url,width: 100,height: 100,),
+                          onTap: (){
+                            _toPreview(orderDetailModel.data.comment.imgs,index);
+                          },
+                        ));
+                      }).values.toList(),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          )
+        ),
+        commonDivider(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -208,7 +284,10 @@ class _OrderDetailState extends State<OrderDetail> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                Icon(Icons.place),
+                Padding(
+                  child: Icon(Icons.place,color: Colors.blueAccent,),
+                  padding: EdgeInsets.symmetric(horizontal: 5),
+                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -253,6 +332,7 @@ class _OrderDetailState extends State<OrderDetail> {
             ),
           ),
           commonDivider(),
+          orderDetailModel.data.comment != null ? _buildComment() : Container(),
           Container(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,6 +345,18 @@ class _OrderDetailState extends State<OrderDetail> {
                   padding: EdgeInsets.all(10),
                   child: Text('下单时间：${orderDetailModel.data.createdAt}'),
                 ),
+                orderDetailModel.data.status == 0 ? Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text('取消类型：${orderDetailModel.data.canceledBy}'),
+                ) : Container(),
+                orderDetailModel.data.payTime != null ? Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text('支付时间：${orderDetailModel.data.payTime}'),
+                ) : Container(),
+                orderDetailModel.data.receiveTime != null ? Container(
+                  padding: EdgeInsets.all(10),
+                  child: Text('收货时间：${orderDetailModel.data.receiveTime}'),
+                ) : Container(),
               ],
             ),
           ),

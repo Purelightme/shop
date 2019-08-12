@@ -39,6 +39,7 @@ class _VideoDetailState extends State<VideoDetail> {
               Row(
                 children: <Widget>[
                   CircleAvatar(
+                    foregroundColor: Colors.redAccent,
                     backgroundImage: AssetImage('images/banners/xiezi.jpeg'),
                   ),
                   Text('昵称'),

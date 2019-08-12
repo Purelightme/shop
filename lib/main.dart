@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/routes/route.dart';
+import 'package:shop/score/score_index.dart';
 
 import 'activity/activity_index.dart';
 import 'authenticate/login.dart';
@@ -26,7 +27,8 @@ class _MyAppState extends State<MyApp> {
   final List<Widget> _children = [
     new Index(),
     new CategoryIndex(),
-    new ActivityIndex(),
+//    new ActivityIndex(),
+    new ScoreIndex(),
     new MyIndex()
   ];
 
@@ -78,11 +80,20 @@ class _MyAppState extends State<MyApp> {
                         color:
                         _currentIndex == 1 ? Colors.redAccent : Colors.black),
                   )),
+//              BottomNavigationBarItem(
+//                  icon: new Icon(Icons.explore,
+//                      color: _currentIndex == 2 ? Colors.redAccent : Colors.grey),
+//                  title: Text(
+//                    '活动',
+//                    style: TextStyle(
+//                        color:
+//                        _currentIndex == 2 ? Colors.redAccent : Colors.black),
+//                  )),
               BottomNavigationBarItem(
                   icon: new Icon(Icons.explore,
                       color: _currentIndex == 2 ? Colors.redAccent : Colors.grey),
                   title: Text(
-                    '活动',
+                    '积分商城',
                     style: TextStyle(
                         color:
                         _currentIndex == 2 ? Colors.redAccent : Colors.black),
@@ -97,16 +108,6 @@ class _MyAppState extends State<MyApp> {
                         _currentIndex == 3 ? Colors.redAccent : Colors.black),
                   )),
             ],
-          ),
-          floatingActionButton: Builder(
-              builder: (context) => FloatingActionButton(
-                onPressed: (){
-                  Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => Login())
-                  );
-                },
-                child: Icon(Icons.palette),
-              )
           ),
         ),
       );

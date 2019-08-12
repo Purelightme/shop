@@ -73,39 +73,41 @@ class _CategoryIndexState extends State<CategoryIndex> {
           child: Text(children.title),
         ),
         Container(
-            margin: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-              color: Colors.white,
-            ),
-            child: GridView.count(
-                crossAxisCount: 3,
-                physics: new NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                children: children.lastChildren.map<Widget>((LastChildren last) {
-                  return TouchCallback(
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      child: Column(
-                        children: <Widget>[
-                          Image.network(last.imageCover, width: 50, height: 50,),
-                          Text(last.title)
-                        ],
+              margin: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                color: Colors.white,
+              ),
+              child: GridView.count(
+                  crossAxisCount: 3,
+                  physics: new NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+//                crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  children: children.lastChildren.map<Widget>((LastChildren last) {
+                    return TouchCallback(
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          children: <Widget>[
+                            Image.network(last.imageCover, width: 50, height: 50,),
+                            Expanded(
+                              child: Text(last.title),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    onPressed: (){
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context){
-                          return ProductList(categoryId: last.id,);
-                        })
-                      );
-                    },
-                  );
-                }).toList()
-            )
-        ),
+                      onPressed: (){
+                        Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context){
+                              return ProductList(categoryId: last.id,);
+                            })
+                        );
+                      },
+                    );
+                  }).toList()
+              )
+          ),
       ],
     );
   }

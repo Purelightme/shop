@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shop/common/canvas/arc.dart';
-import 'package:shop/common/canvas/circle.dart';
 import 'package:shop/common/canvas/selected_circle.dart';
 import 'package:shop/common/common.dart';
-import 'package:clipboard_manager/clipboard_manager.dart';
 import 'package:shop/models/order_detail_model.dart';
 import 'package:shop/utils/copy_clipboard.dart';
 

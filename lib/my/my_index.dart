@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shop/api/api.dart';
 import 'package:shop/common/entry_item.dart';
+import 'package:shop/common/notification.dart';
 import 'package:shop/common/touch_callback.dart';
 import 'package:flutter_badge/flutter_badge.dart';
 import 'package:shop/models/badge_model.dart';
@@ -72,12 +73,14 @@ class _MyIndexState extends State<MyIndex> {
       http.get(api_prefix + '/user/info',headers: {
         'Authorization':'Bearer ' + token
       }).then((res){
-        print(res.body);
-        setState(() {
-          _userModel = UserModel.fromJson(json.decode(res.body));
-          _isLogined = true;
-          _isLoading = false;
-        });
+        UserModel um = UserModel.fromJson(json.decode(res.body));
+        if(um.errcode == 0){
+          setState(() {
+            _userModel = um;
+            _isLogined = true;
+            _isLoading = false;
+          });
+        }
       });
 
       //请求badge
@@ -90,6 +93,15 @@ class _MyIndexState extends State<MyIndex> {
           waitReceives = _badgeModel.data.waitReceives;
           waitComments = _badgeModel.data.waitComments;
         });
+      });
+    }else{
+      setState(() {
+        _userModel = null;
+        waitPays = 0;
+        waitComments = 0;
+        waitReceives = 0;
+        _image = null;
+        _isLoading = false;
       });
     }
   }
@@ -108,9 +120,7 @@ class _MyIndexState extends State<MyIndex> {
               Navigator.of(context).push(MaterialPageRoute(builder: (context){
                 return Profile(userModel: _userModel,);
               })).then((res)async{
-                if(res == 'refresh'){
                   _getBaseInfo();
-                }
               });
             },
             child: Row(
@@ -235,6 +245,20 @@ class _MyIndexState extends State<MyIndex> {
           color: Colors.white,
           child: Column(
             children: <Widget>[
+              EntryItem(
+                icon: Icon(Icons.score,color: Colors.teal,),
+                title: '我的积分',
+                onPressed: (){
+                  showToast(context,'敬请期待');
+                },
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 15.0,right: 15.0),
+                child: Divider(
+                  height: 0.5,
+                  color: Color(0xFFd9d9d9),
+                ),
+              ),
               EntryItem(
                 icon: Icon(Icons.message,color: Colors.lime,),
                 title: '我的消息',

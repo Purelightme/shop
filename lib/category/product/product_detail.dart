@@ -169,6 +169,7 @@ class _ProductDetailState extends State<ProductDetail> {
                 Container(
                   padding: EdgeInsets.all(10),
                   child: CircleAvatar(
+                    foregroundColor: Colors.redAccent,
                     backgroundImage: NetworkImage(item.user.avatar),
                   ),
                 ),
@@ -576,6 +577,21 @@ class _ProductDetailState extends State<ProductDetail> {
     return Scaffold(
       appBar: AppBar(
         title: Text('商品详情'),
+        actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.share,color: Colors.white,),
+              onPressed: ()async{
+                var response =
+                await FlutterShareMe().shareToSystem(
+                    msg: '我在一个小店发现了一件好宝贝，分享给你也看看：'+
+                        _doubleSpecificationProductModel.data.longTitle +
+                        _doubleSpecificationProductModel.data.imageCover);
+                if (response == 'success') {
+                  print('navigate success');
+                }
+              },
+            ),
+        ],
       ),
       body: _isLoading ? Container() : Builder(builder: (context){
           return Container(
@@ -594,22 +610,6 @@ class _ProductDetailState extends State<ProductDetail> {
                                 backgroundColor: Colors.grey[600].withOpacity(0.1),
                                 label: Text('${_current+1}/${_doubleSpecificationProductModel.data.imgs.length}')
                             )
-                        ),
-                        Positioned(
-                          child: IconButton(
-                            icon: Icon(Icons.share),
-                            onPressed: ()async{
-                              print(111);
-                              var response =
-                              await FlutterShareMe().shareToSystem(
-                                  msg: '我在一个小店发现了一件好宝贝，分享给你也看看：'+
-                              _doubleSpecificationProductModel.data.longTitle +
-                                  _doubleSpecificationProductModel.data.imageCover);
-                              if (response == 'success') {
-                                print('navigate success');
-                              }
-                            },
-                          ),
                         ),
                       ],
                     ),
@@ -681,14 +681,14 @@ class _ProductDetailState extends State<ProductDetail> {
                                     margin: EdgeInsets.only(left: 20),
                                     child: Row(
                                       children: <Widget>[
-                                        Icon(Icons.location_on,color: Colors.transparent.withOpacity(0.5),),
+                                        Icon(Icons.location_on,color: Colors.blueAccent.withOpacity(0.5),),
                                         Text(_doubleSpecificationProductModel.data.location),
                                       ],
                                     ),
                                   ),
                                   Container(
                                     margin: EdgeInsets.only(left: 20),
-                                    child: Text('快递:${_doubleSpecificationProductModel.data.expressFee}'),
+                                    child: Text('快递：￥${_doubleSpecificationProductModel.data.expressFee}'),
                                   )
                                 ],
                               ),

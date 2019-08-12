@@ -83,6 +83,7 @@ class _CommentPageState extends State<CommentPage> {
                 Container(
                   padding: EdgeInsets.all(10),
                   child: CircleAvatar(
+                    foregroundColor: Colors.redAccent,
                     backgroundImage: NetworkImage(item.user.avatar),
                   ),
                 ),

@@ -4,9 +4,7 @@ import 'package:shop/api/api.dart';
 import 'package:shop/authenticate/register.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop/common/notification.dart';
-import 'package:shop/index/index.dart';
 import 'package:shop/models/user_model.dart';
-import 'package:shop/my/my_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../main.dart';

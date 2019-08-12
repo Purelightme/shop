@@ -62,6 +62,10 @@ class _OrderCheck extends State<OrderCheck> {
 
   _initAddress()async{
     String token = await getToken();
+    if(token.isEmpty){
+      showToast(context, '请先登录');
+      return;
+    }
     http.get(api_prefix+'/addresses',headers: {
       'Authorization':'Bearer $token'
     }).then((res){
@@ -256,7 +260,26 @@ class _OrderCheck extends State<OrderCheck> {
                   onTap: (){
                     _chooseAddress();
                   },
-                ) : Container(),
+                ) : Container(
+                  padding: EdgeInsets.all(10),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text('请先添加收货地址'),
+                        FlatButton(
+                          child: Text('去添加'),
+                          color: Colors.redAccent.withOpacity(0.1),
+                          onPressed: (){
+                            Navigator.of(context).pushNamed('/receive_address').then((res){
+                              _initAddress();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 commonDivider(opacity: 0.1),
                 Container(
                   child: _data != null ? Row(

@@ -36,6 +36,7 @@ class Data {
   String expressFee;
   List<Expresses> expresses;
   String createdAt;
+  Comment comment;
 
   Data(
       {this.id,
@@ -50,7 +51,8 @@ class Data {
         this.canceledBy,
         this.expressFee,
         this.expresses,
-        this.createdAt});
+        this.createdAt,
+        this.comment});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -78,6 +80,9 @@ class Data {
       });
     }
     createdAt = json['created_at'];
+    if (json['comment'] != null){
+      comment = new Comment.fromJson(json['comment']);
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -327,3 +332,29 @@ class Detail {
     return data;
   }
 }
+
+class Comment {
+  int star;
+  String content;
+  List<String> imgs;
+  String createdAt;
+
+  Comment({this.star, this.content, this.imgs, this.createdAt});
+
+  Comment.fromJson(Map<String, dynamic> json) {
+    star = json['star'];
+    content = json['content'];
+    imgs = json['imgs'].cast<String>();
+    createdAt = json['created_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['star'] = this.star;
+    data['content'] = this.content;
+    data['imgs'] = this.imgs;
+    data['created_at'] = this.createdAt;
+    return data;
+  }
+}
+

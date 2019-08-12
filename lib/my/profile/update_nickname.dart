@@ -62,7 +62,7 @@ class _UpdateNicknameState extends State<UpdateNickname> {
                   showToast(context,_commonResModel.errmsg);
                 }else{
                   Navigator.of(context).pop();
-                  //todo 跳转
+                  Navigator.of(context).pop();
                 }
               });
             },
