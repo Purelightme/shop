@@ -29,6 +29,7 @@ class Data {
   String token;
   String avatar;
   int registerNumber;
+  int score;
 
   Data(
       {this.id,
@@ -36,7 +37,8 @@ class Data {
         this.email,
         this.token,
         this.avatar,
-        this.registerNumber});
+        this.registerNumber,
+        this.score});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -45,6 +47,7 @@ class Data {
     token = json['token'];
     avatar = json['avatar'];
     registerNumber = json['register_number'];
+    score = json['score'];
   }
 
   Map<String, dynamic> toJson() {
@@ -55,6 +58,7 @@ class Data {
     data['token'] = this.token;
     data['avatar'] = this.avatar;
     data['register_number'] = this.registerNumber;
+    data['score'] = this.score;
     return data;
   }
 }

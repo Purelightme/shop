@@ -102,12 +102,21 @@ class _ScoreOrderState extends State<ScoreOrder> {
                 Container(
                   padding: EdgeInsets.only(right: 10),
                   child: Text(
-                      '-' + item.scoreProduct.score.toString()
+                      '-' + item.scoreProduct.score.toString(),
+                    style: TextStyle(
+                      color: item.status == 1 ? Colors.blueAccent :
+                          item.status == 2 ? Colors.redAccent :
+                              Colors.green
+                    ),
                   ),
                 ),
                 Container(
                   padding: EdgeInsets.only(right: 10),
-                  child: Text(item.statusDesc),
+                  child: Text(item.statusDesc,style: TextStyle(
+                      color: item.status == 1 ? Colors.blueAccent :
+                      item.status == 2 ? Colors.redAccent :
+                      Colors.green
+                  ),),
                 )
               ],
             ),
@@ -126,122 +135,122 @@ class _ScoreOrderState extends State<ScoreOrder> {
         title: Text('兑换记录'),
       ),
       body: ListView(
-        children: <Widget>[
-          SizedBox(
-            height: 10,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              InkWell(
-                onTap: (){
-                  setState(() {
-                    _status = null;
-                    _hasMore = true;
-                    _page = 0;
-                    _items = [];
-                  });
-                  fetchNextPage();
-                },
-                child: Container(
-                  width: 100,
-                  height: 40,
-                  child: Center(
-                    child: Text('全部'),
-                  ),
-                  decoration: BoxDecoration(
-                      color: _status == null ? Color(0xFFD2AC7C) : Color(0xFFE6C599),
-                    borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-                  setState(() {
-                    _status = 1;
-                    _hasMore = true;
-                    _page = 0;
-                    _items = [];
-                  });
-                  fetchNextPage();
-                },
-                child: Container(
-                  width: 100,
-                  height: 40,
-                  child: Center(
-                    child: Text('处理中'),
-                  ),
-                  decoration: BoxDecoration(
-                      color: _status == 1 ? Color(0xFFD2AC7C) : Color(0xFFE6C599),
-                      borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-                  setState(() {
-                    _status = 2;
-                    _hasMore = true;
-                    _page = 0;
-                    _items = [];
-                  });
-                  fetchNextPage();
-                },
-                child: Container(
-                  width: 100,
-                  height: 40,
-                  child: Center(
-                    child: Text('兑换失败'),
-                  ),
-                  decoration: BoxDecoration(
-                      color: _status == 2 ? Color(0xFFD2AC7C) : Color(0xFFE6C599),
-                      borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                ),
-              ),
-              InkWell(
-                onTap: (){
-                  setState(() {
-                    _status = 3;
-                    _hasMore = true;
-                    _page = 0;
-                    _items = [];
-                  });
-                  fetchNextPage();
-                },
-                child: Container(
-                  width: 100,
-                  height: 40,
-                  child: Center(
-                    child: Text('兑换成功'),
-                  ),
-                  decoration: BoxDecoration(
-                      color: _status == 3 ? Color(0xFFD2AC7C) : Color(0xFFE6C599),
-                      borderRadius: BorderRadius.all(Radius.circular(5))
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          ..._items.map((item) => _buildItem(item)).toList(),
-          Offstage(
-            offstage: !_isLoading,
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  RefreshProgressIndicator(),
-                  SizedBox(width: 2,),
-                  Text('正在加载...')
-                ],
-              ),
+          children: <Widget>[
+            SizedBox(
+              height: 10,
             ),
-          )
-        ],
-      )
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                InkWell(
+                  onTap: (){
+                    setState(() {
+                      _status = null;
+                      _hasMore = true;
+                      _page = 0;
+                      _items = [];
+                    });
+                    fetchNextPage();
+                  },
+                  child: Container(
+                    width: 100,
+                    height: 40,
+                    child: Center(
+                      child: Text('全部'),
+                    ),
+                    decoration: BoxDecoration(
+                        color: _status == null ? Color(0xFFD2AC7C) : Color(0xFFE6C599),
+                        borderRadius: BorderRadius.all(Radius.circular(5))
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: (){
+                    setState(() {
+                      _status = 1;
+                      _hasMore = true;
+                      _page = 0;
+                      _items = [];
+                    });
+                    fetchNextPage();
+                  },
+                  child: Container(
+                    width: 100,
+                    height: 40,
+                    child: Center(
+                      child: Text('处理中'),
+                    ),
+                    decoration: BoxDecoration(
+                        color: _status == 1 ? Color(0xFFD2AC7C) : Color(0xFFE6C599),
+                        borderRadius: BorderRadius.all(Radius.circular(5))
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: (){
+                    setState(() {
+                      _status = 2;
+                      _hasMore = true;
+                      _page = 0;
+                      _items = [];
+                    });
+                    fetchNextPage();
+                  },
+                  child: Container(
+                    width: 100,
+                    height: 40,
+                    child: Center(
+                      child: Text('兑换失败'),
+                    ),
+                    decoration: BoxDecoration(
+                        color: _status == 2 ? Color(0xFFD2AC7C) : Color(0xFFE6C599),
+                        borderRadius: BorderRadius.all(Radius.circular(5))
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: (){
+                    setState(() {
+                      _status = 3;
+                      _hasMore = true;
+                      _page = 0;
+                      _items = [];
+                    });
+                    fetchNextPage();
+                  },
+                  child: Container(
+                    width: 100,
+                    height: 40,
+                    child: Center(
+                      child: Text('兑换成功'),
+                    ),
+                    decoration: BoxDecoration(
+                        color: _status == 3 ? Color(0xFFD2AC7C) : Color(0xFFE6C599),
+                        borderRadius: BorderRadius.all(Radius.circular(5))
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            ..._items.map((item) => _buildItem(item)).toList(),
+            Offstage(
+              offstage: !_isLoading,
+              child: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    RefreshProgressIndicator(),
+                    SizedBox(width: 2,),
+                    Text('正在加载...')
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
     );
   }
 }

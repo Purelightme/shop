@@ -5,10 +5,12 @@ import 'package:shop/api/api.dart';
 import 'package:shop/common/common.dart';
 import 'package:shop/common/notification.dart';
 import 'package:shop/models/score_product_model.dart';
+import 'package:shop/models/user_model.dart';
 import 'package:shop/score/score_order.dart';
 import 'package:shop/score/score_order_check.dart';
-import 'package:shop/score/score_record.dart';
+import 'package:shop/score/score_change.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop/utils/token.dart';
 
 class ScoreIndex extends StatefulWidget {
   @override
@@ -22,18 +24,35 @@ class _ScoreIndexState extends State<ScoreIndex> {
   bool _hasMore = true;
   int _category;
   bool _isLoading = true;
+  int _score = 0;
 
   ScrollController _controller = new ScrollController();
 
   @override
   initState(){
     super.initState();
+    getUserBaseInfo();
     fetchNextPage();
     _controller.addListener((){
       if (_controller.position.pixels ==
           _controller.position.maxScrollExtent) {
         fetchNextPage();
       }
+    });
+  }
+  
+  getUserBaseInfo()async{
+    String token = await getToken();
+    if(token.isEmpty){
+      return;
+    }
+    http.get(api_prefix + '/user/info',headers: {
+      'Authorization':'Bearer $token'
+    }).then((res){
+      UserModel _userModel = UserModel.fromJson(json.decode(res.body));
+      setState(() {
+        _score = _userModel.data.score;
+      });
     });
   }
 
@@ -95,36 +114,22 @@ class _ScoreIndexState extends State<ScoreIndex> {
                         ),softWrap: true,maxLines: 2,overflow: TextOverflow.ellipsis,),
                       ),
                       Row(
-                        children: <Widget>[
-                          Container(
-                            margin: EdgeInsets.all(1),
+                        children: item.features.split(',').map((str){
+                          return Container(
+                            margin: EdgeInsets.all(2),
                             child: Text(
-                              '到店消费',
+                              str,
                               style: TextStyle(
-                                  color: Colors.redAccent,
+                                  color: Colors.grey,
                                   fontSize: 10),
                             ),
                             decoration: BoxDecoration(
                                 border: Border.all(
-                                    color: Colors.redAccent,
+                                    color: Colors.grey,
                                     width: 1)),
                             padding: EdgeInsets.all(1),
-                          ),
-                          Container(
-                            margin: EdgeInsets.all(1),
-                            child: Text(
-                              '到店消费',
-                              style: TextStyle(
-                                  color: Colors.redAccent,
-                                  fontSize: 10),
-                            ),
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: Colors.redAccent,
-                                    width: 1)),
-                            padding: EdgeInsets.all(1),
-                          ),
-                        ],
+                          );
+                        }).toList(),
                       ),
                       Row(
                         children: <Widget>[
@@ -179,7 +184,7 @@ class _ScoreIndexState extends State<ScoreIndex> {
                               color: Colors.redAccent.withOpacity(0.8),
                               onPressed: (){
                                 Navigator.of(context).push(MaterialPageRoute(builder: (context){
-                                  return ScoreOrderCheck();
+                                  return ScoreOrderCheck(item: item,);
                                 }));
                               },
                             )
@@ -197,172 +202,186 @@ class _ScoreIndexState extends State<ScoreIndex> {
     );
   }
 
+  Future<void> _onRefresh()async{
+    setState(() {
+      _page = 0;
+      _category = null;
+      _hasMore = true;
+      _items = [];
+    });
+    fetchNextPage();
+    getUserBaseInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: ListView(
-        controller: _controller,
-        children: <Widget>[
-          Container(
-              height: 150,
-              decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                      colors: [Color(0xFFE6C599), Color(0xFFD2AC7C)],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Baseline(
-                        baselineType: TextBaseline.alphabetic,
-                        baseline: 20,
-                        child: Text(
-                          '209',
-                          style: TextStyle(
-                              fontSize: 50,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Baseline(
-                        baselineType: TextBaseline.alphabetic,
-                        baseline: 20,
-                        child: Text(
-                          '积分',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    height: 60,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return RefreshIndicator(
+      child: Container(
+        child: ListView(
+          controller: _controller,
+          children: <Widget>[
+            Container(
+                height: 150,
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        colors: [Color(0xFFE6C599), Color(0xFFD2AC7C)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        GestureDetector(
-                          child: Text('积分变化',style: TextStyle(
-                              fontSize: 16
-                          ),),
-                          onTap: (){
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context){
-                              return ScoreRecord();
-                            }));
-                          },
+                        Baseline(
+                          baselineType: TextBaseline.alphabetic,
+                          baseline: 20,
+                          child: Text(
+                            _score.toString(),
+                            style: TextStyle(
+                                fontSize: 50,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
                         ),
-                        Container(
-                          width: 2,
-                          height: 40,
-                          color: Colors.grey,
+                        Baseline(
+                          baselineType: TextBaseline.alphabetic,
+                          baseline: 20,
+                          child: Text(
+                            '积分',
+                            style: TextStyle(fontSize: 20),
+                          ),
                         ),
-                        GestureDetector(
-                          child: Text('兑换记录',style: TextStyle(
-                              fontSize: 16
-                          ),),
-                          onTap: (){
-                            Navigator.of(context).push(MaterialPageRoute(builder: (context){
-                              return ScoreOrder();
-                            }));
-                          },
+                      ],
+                    ),
+                    Container(
+                        height: 60,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                            GestureDetector(
+                              child: Text('积分变化',style: TextStyle(
+                                  fontSize: 16
+                              ),),
+                              onTap: (){
+                                Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                                  return ScoreChange();
+                                }));
+                              },
+                            ),
+                            Container(
+                              width: 2,
+                              height: 40,
+                              color: Colors.grey,
+                            ),
+                            GestureDetector(
+                              child: Text('兑换记录',style: TextStyle(
+                                  fontSize: 16
+                              ),),
+                              onTap: (){
+                                Navigator.of(context).push(MaterialPageRoute(builder: (context){
+                                  return ScoreOrder();
+                                }));
+                              },
+                            )
+                          ],
+                        )
+                    ),
+                  ],
+                )),
+            commonDivider(),
+            Container(
+              height: 100,
+              padding: EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  GestureDetector(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          '实物商城',
+                          style:
+                          TextStyle(fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '好货多先到先得',
+                          style: TextStyle(color: Colors.grey),
                         )
                       ],
-                    )
+                    ),
+                    onTap: (){
+                      setState(() {
+                        _page = 0;
+                        _category = 1;
+                        _hasMore = true;
+                        _items = [];
+                      });
+                      fetchNextPage();
+                    },
                   ),
-                ],
-              )),
-          commonDivider(),
-          Container(
-            height: 100,
-            padding: EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                GestureDetector(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        '实物商城',
-                        style:
-                        TextStyle(fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                  CircleAvatar(
+                      backgroundImage: AssetImage(
+                        'images/commons/express.jpg',
+                      )),
+                  GestureDetector(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          '虚拟商城',
+                          style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      Text(
-                        '好货多先到先得',
-                        style: TextStyle(color: Colors.grey),
-                      )
-                    ],
+                        Text(
+                          '话费流量0元兑',
+                          style: TextStyle(color: Colors.grey),
+                        )
+                      ],
+                    ),
+                    onTap: (){
+                      setState(() {
+                        _page = 0;
+                        _category = 2;
+                        _hasMore = true;
+                        _items = [];
+                      });
+                      fetchNextPage();
+                    },
                   ),
-                  onTap: (){
-                    setState(() {
-                      _page = 0;
-                      _category = 1;
-                      _hasMore = true;
-                      _items = [];
-                    });
-                    fetchNextPage();
-                  },
-                ),
-                CircleAvatar(
-                    backgroundImage: AssetImage(
-                  'images/commons/express.jpg',
-                )),
-                GestureDetector(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        '虚拟商城',
-                        style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        '话费流量0元兑',
-                        style: TextStyle(color: Colors.grey),
-                      )
-                    ],
-                  ),
-                  onTap: (){
-                    setState(() {
-                      _page = 0;
-                      _category = 2;
-                      _hasMore = true;
-                      _items = [];
-                    });
-                    fetchNextPage();
-                  },
-                ),
-                CircleAvatar(
-                    backgroundImage: AssetImage(
-                  'images/commons/cloud.png',
-                )),
-              ],
-            ),
-          ),
-          commonDivider(),
-          Column(
-            children: _items.map((item) => _buildItem(item)).toList(),
-          ),
-          Offstage(
-            offstage: !_isLoading,
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  RefreshProgressIndicator(),
-                  SizedBox(width: 2,),
-                  Text('正在加载...')
+                  CircleAvatar(
+                      backgroundImage: AssetImage(
+                        'images/commons/cloud.png',
+                      )),
                 ],
               ),
             ),
-          ),
-        ],
+            commonDivider(),
+            Column(
+              children: _items.map((item) => _buildItem(item)).toList(),
+            ),
+            Offstage(
+              offstage: !_isLoading,
+              child: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    RefreshProgressIndicator(),
+                    SizedBox(width: 2,),
+                    Text('正在加载...')
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+      onRefresh: _onRefresh,
     );
   }
 }

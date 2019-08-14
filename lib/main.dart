@@ -50,10 +50,10 @@ class _MyAppState extends State<MyApp> {
           appBar: AppBar(
             title: Text('一个小店'),
             actions: <Widget>[
-              IconButton(icon: Icon(Icons.delete_forever), onPressed: ()async{
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.remove('token');
-              })
+//              IconButton(icon: Icon(Icons.delete_forever), onPressed: ()async{
+//                SharedPreferences prefs = await SharedPreferences.getInstance();
+//                prefs.remove('token');
+//              })
             ],
           ),
           body: _children[_currentIndex],

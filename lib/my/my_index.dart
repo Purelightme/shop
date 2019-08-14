@@ -246,20 +246,6 @@ class _MyIndexState extends State<MyIndex> {
           child: Column(
             children: <Widget>[
               EntryItem(
-                icon: Icon(Icons.score,color: Colors.teal,),
-                title: '我的积分',
-                onPressed: (){
-                  showToast(context,'敬请期待');
-                },
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 15.0,right: 15.0),
-                child: Divider(
-                  height: 0.5,
-                  color: Color(0xFFd9d9d9),
-                ),
-              ),
-              EntryItem(
                 icon: Icon(Icons.message,color: Colors.lime,),
                 title: '我的消息',
                 onPressed: (){

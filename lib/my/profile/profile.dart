@@ -11,6 +11,8 @@ import 'package:shop/models/common_res_model.dart';
 import 'package:shop/models/user_model.dart';
 import 'package:shop/my/profile/update_nickname.dart';
 
+import '../../main.dart';
+
 
 class Profile extends StatefulWidget {
 
@@ -70,7 +72,9 @@ class _ProfileState extends State<Profile> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('token');
     Navigator.of(context).pop();
-    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context){
+      return MyApp();
+    }));
   }
 
   @override
