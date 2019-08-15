@@ -4,54 +4,54 @@ PODS:
   - Flutter (1.0.0)
   - flutter_drag_scale (0.0.1):
     - Flutter
-  - flutter_share_me (0.0.1):
+  - image_picker_saver (0.0.1):
     - Flutter
   - image_saver (0.0.1):
     - Flutter
   - photo_manager (0.0.1):
     - Flutter
-  - shared_preferences (0.0.1):
+  - share_extend (0.0.1):
     - Flutter
-  - video_player (0.0.1):
+  - shared_preferences (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - city_pickers (from `.symlinks/plugins/city_pickers/ios`)
-  - Flutter (from `.symlinks/flutter/ios-release`)
+  - Flutter (from `.symlinks/flutter/ios`)
   - flutter_drag_scale (from `.symlinks/plugins/flutter_drag_scale/ios`)
-  - flutter_share_me (from `.symlinks/plugins/flutter_share_me/ios`)
+  - image_picker_saver (from `.symlinks/plugins/image_picker_saver/ios`)
   - image_saver (from `.symlinks/plugins/image_saver/ios`)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
+  - share_extend (from `.symlinks/plugins/share_extend/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
-  - video_player (from `.symlinks/plugins/video_player/ios`)
 
 EXTERNAL SOURCES:
   city_pickers:
     :path: ".symlinks/plugins/city_pickers/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios-release"
+    :path: ".symlinks/flutter/ios"
   flutter_drag_scale:
     :path: ".symlinks/plugins/flutter_drag_scale/ios"
-  flutter_share_me:
-    :path: ".symlinks/plugins/flutter_share_me/ios"
+  image_picker_saver:
+    :path: ".symlinks/plugins/image_picker_saver/ios"
   image_saver:
     :path: ".symlinks/plugins/image_saver/ios"
   photo_manager:
     :path: ".symlinks/plugins/photo_manager/ios"
+  share_extend:
+    :path: ".symlinks/plugins/share_extend/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
-  video_player:
-    :path: ".symlinks/plugins/video_player/ios"
 
 SPEC CHECKSUMS:
   city_pickers: b0370f4c35c201723b5b7fcce10ec29b59d5bc35
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
   flutter_drag_scale: 545fd546a1e968bd965883f0511b1c47f049f37d
-  flutter_share_me: dd04bcb65a595f76bd2fa0537df08fffc5a04903
+  image_picker_saver: 4f28bd70e1efdca68ad88beab0f11d22cffe04f6
   image_saver: 687f4ca28ae104255c78612b3420422791f2d2aa
   photo_manager: d47ddf6cb25cbfa837dc334540eb9a99b208e191
+  share_extend: b6748dc53695587891126a89533b862b92548c7b
   shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
-  video_player: 3964090a33353060ed7f58aa6427c7b4b208ec21
 
 PODFILE CHECKSUM: 6732a0ea335ca9357eb84ab2ca10ddd6bf6bf970
 

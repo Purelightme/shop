@@ -15,7 +15,6 @@ import 'package:shop/my/profile/update_nickname.dart';
 import 'package:shop/my/receive_address/add_address.dart';
 import 'package:shop/my/receive_address/receive_address.dart';
 import 'package:shop/my/usage/usage.dart';
-import 'package:shop/search/search.dart';
 import 'package:shop/category/search/search.dart' as Search2;
 
 final routes = {
@@ -25,7 +24,6 @@ final routes = {
   '/usage': (BuildContext context) => Usage(),
   '/about': (BuildContext context) => About(),
   '/profile': (BuildContext context) => Profile(),
-  '/search': (BuildContext context) => Search(),
   '/store_info': (BuildContext context) => StoreInfo(),
   '/introduction': (BuildContext context) => Introduction(),
   '/update_nickname': (BuildContext context) => UpdateNickname(),

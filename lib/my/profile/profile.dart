@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-//import 'package:image_picker_saver/image_picker_saver.dart';
+import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/api/api.dart';
 import 'package:shop/common/notification.dart';
@@ -152,10 +152,10 @@ class _ProfileState extends State<Profile> {
                               leading: new Icon(Icons.photo_camera),
                               title: new Text("拍照"),
                               onTap: () async {
-//                                File image = await ImagePickerSaver.pickImage(
-//                                    source: ImageSource.camera
-//                                );
-//                                _updateAvatar(image);
+                                File image = await ImagePickerSaver.pickImage(
+                                    source: ImageSource.camera
+                                );
+                                _updateAvatar(image);
                                 Navigator.pop(context);
                               },
                             ),
@@ -163,10 +163,10 @@ class _ProfileState extends State<Profile> {
                               leading: new Icon(Icons.photo_library),
                               title: new Text("相册"),
                               onTap: () async {
-//                                File image = await ImagePickerSaver.pickImage(
-//                                    source: ImageSource.gallery
-//                                );
-//                                _updateAvatar(image);
+                                File image = await ImagePickerSaver.pickImage(
+                                    source: ImageSource.gallery
+                                );
+                                _updateAvatar(image);
                                 Navigator.pop(context);
                               },
                             ),

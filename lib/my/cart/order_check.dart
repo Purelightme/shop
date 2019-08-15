@@ -228,7 +228,7 @@ class _OrderCheckState extends State<OrderCheck> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  width: 250,
+                  width: 220,
                   child: Text(item.product.longTitle,
                     softWrap: true,
                     maxLines: 2,
@@ -249,7 +249,7 @@ class _OrderCheckState extends State<OrderCheck> {
             Expanded(
               child: Container(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     IconButton(
                       icon: Icon(Icons.add),

@@ -8,7 +8,6 @@ import 'activity/activity_index.dart';
 import 'authenticate/login.dart';
 import 'authenticate/register.dart';
 import 'category/category_index.dart';
-import 'dynamic/dynamic_index.dart';
 import 'index/index.dart';
 import 'models/user_model.dart';
 import 'my/message/message.dart';

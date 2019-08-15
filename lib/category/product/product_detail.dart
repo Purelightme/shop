@@ -4,7 +4,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:shop/api/api.dart';
 import 'package:shop/common/common.dart';
-import 'package:flutter_share_me/flutter_share_me.dart';
+import 'package:share_extend/share_extend.dart';
 import 'package:shop/common/notification.dart';
 import 'package:shop/models/common_res_model.dart';
 import 'package:shop/models/double_specification_product_model.dart';
@@ -582,10 +582,10 @@ class _ProductDetailState extends State<ProductDetail> {
               icon: Icon(Icons.share,color: Colors.white,),
               onPressed: ()async{
                 var response =
-                await FlutterShareMe().shareToSystem(
-                    msg: '我在一个小店发现了一件好宝贝，分享给你也看看：'+
+                ShareExtend.share(
+                    '我在一个小店发现了一件好宝贝，分享给你也看看：'+
                         _doubleSpecificationProductModel.data.longTitle +
-                        _doubleSpecificationProductModel.data.imageCover);
+                        _doubleSpecificationProductModel.data.imageCover,'text');
                 if (response == 'success') {
                   print('navigate success');
                 }
@@ -905,43 +905,45 @@ class _ProductDetailState extends State<ProductDetail> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
-                          Container(
-                            padding: EdgeInsets.only(top: 10),
-                            child: Row(
-                              children: <Widget>[
-                                Column(
-                                  children: <Widget>[
-                                    Icon(Icons.person,color: Colors.blueAccent,),
-                                    Text('客服',style: TextStyle(
-                                        color: Colors.black.withOpacity(0.5)
-                                    ),)
-                                  ],
-                                ),
-                                Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 30),
-                                  child: Column(
+                          Expanded(
+                            child: Container(
+                              padding: EdgeInsets.only(top: 10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: <Widget>[
+                                  Column(
                                     children: <Widget>[
-                                      Icon(Icons.star_border,color: Colors.orangeAccent,),
-                                      Text('收藏',style: TextStyle(
+                                      Icon(Icons.person,color: Colors.blueAccent,),
+                                      Text('客服',style: TextStyle(
                                           color: Colors.black.withOpacity(0.5)
                                       ),)
                                     ],
                                   ),
-                                ),
-                                GestureDetector(
-                                  child: Column(
-                                    children: <Widget>[
-                                      Icon(Icons.add_shopping_cart,color: Colors.purpleAccent,),
-                                      Text('购物车',style: TextStyle(
-                                          color: Colors.black.withOpacity(0.5)
-                                      ),)
-                                    ],
+                                  Container(
+                                    child: Column(
+                                      children: <Widget>[
+                                        Icon(Icons.star_border,color: Colors.orangeAccent,),
+                                        Text('收藏',style: TextStyle(
+                                            color: Colors.black.withOpacity(0.5)
+                                        ),)
+                                      ],
+                                    ),
                                   ),
-                                  onTap: (){
-                                    Navigator.of(context).pushNamed('/cart');
-                                  },
-                                )
-                              ],
+                                  GestureDetector(
+                                    child: Column(
+                                      children: <Widget>[
+                                        Icon(Icons.add_shopping_cart,color: Colors.purpleAccent,),
+                                        Text('购物车',style: TextStyle(
+                                            color: Colors.black.withOpacity(0.5)
+                                        ),)
+                                      ],
+                                    ),
+                                    onTap: (){
+                                      Navigator.of(context).pushNamed('/cart');
+                                    },
+                                  )
+                                ],
+                              ),
                             ),
                           ),
                           SizedBox(

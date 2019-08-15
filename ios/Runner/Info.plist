@@ -43,5 +43,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>系统相册</string>
+	<key>NSCameraUsageDescription</key>
+	<string>系统拍照</string>
 </dict>
 </plist>
