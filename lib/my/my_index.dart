@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shop/api/api.dart';
 import 'package:shop/common/entry_item.dart';
-import 'package:shop/common/notification.dart';
 import 'package:shop/common/touch_callback.dart';
 import 'package:flutter_badge/flutter_badge.dart';
 import 'package:shop/models/badge_model.dart';
@@ -12,7 +11,6 @@ import 'package:shop/models/user_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/my/profile/profile.dart';
-
 import 'order/order_list.dart';
 
 class MyIndex extends StatefulWidget {
@@ -128,7 +126,8 @@ class _MyIndexState extends State<MyIndex> {
               children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(left: 12.0,right: 15.0),
-                  child: _image != null ? Image.file(_image,width: 70.0,height: 70.0,) : Image.network(_userModel.data.avatar,width: 70.0,height: 70.0,),
+                  child: _image != null ? Image.file(_image,width: 70.0,height: 70.0,) :
+                  Image.network(_userModel.data.avatar,width: 70.0,height: 70.0,),
                 ),
                 Expanded(
                   child: Column(

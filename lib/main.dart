@@ -1,17 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/routes/route.dart';
 import 'package:shop/score/score_index.dart';
-
-import 'activity/activity_index.dart';
-import 'authenticate/login.dart';
-import 'authenticate/register.dart';
 import 'category/category_index.dart';
 import 'index/index.dart';
-import 'models/user_model.dart';
-import 'my/message/message.dart';
 import 'my/my_index.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -30,6 +25,25 @@ class _MyAppState extends State<MyApp> {
     new ScoreIndex(),
     new MyIndex()
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _uploadDeviceInfo();
+  }
+
+  _uploadDeviceInfo()async{
+//    Directory appDocDir = await getApplicationDocumentsDirectory();
+//    String dir = appDocDir.path;
+//    final file = new File('$dir/device.txt');
+//    if(!file.existsSync()){
+//      //上传设备信息
+//
+//      //创建文件
+//      file.createSync();
+//    }
+  }
+
 
   void onTabTapped(int index) {
     setState(() {

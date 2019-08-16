@@ -24,7 +24,7 @@ class _UsageState extends State<Usage> {
         title: "下单"),
     TimelineModel(
         id: "2",
-        description: "微信支付宝转账，然后点击'我已付款'",
+        description: "微信支付宝转账给店长，然后点击'我已付款'将会通知店长确认",
         title: "付款"),
     TimelineModel(
         id: "2",
@@ -32,11 +32,11 @@ class _UsageState extends State<Usage> {
         title: "确认收款"),
     TimelineModel(
         id: "2",
-        description: "店长返货，给出快递信息",
+        description: "店长发货，给出快递信息",
         title: "发货"),
     TimelineModel(
         id: "2",
-        description: "等待快递到手",
+        description: "等待快递到手，点击'确认收货'领取商品赠送的积分",
         title: "收货"),
     TimelineModel(
         id: "2",

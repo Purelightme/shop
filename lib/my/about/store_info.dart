@@ -48,7 +48,15 @@ class _StoreInfoState extends State<StoreInfo> {
                         Image.network(data.image),
                         Padding(
                           padding: EdgeInsets.all(10),
-                          child: Text(data.title),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text(data.title),
+                              Text('(长按保存到相册)',style: TextStyle(
+                                color: Colors.blueAccent
+                              ),),
+                            ],
+                          )
                         )
                       ],
                     ),

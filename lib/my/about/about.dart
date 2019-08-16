@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shop/common/notification.dart';
+import 'package:package_info/package_info.dart';
+import 'package:device_info/device_info.dart';
+
 
 class About extends StatefulWidget {
   @override
@@ -7,8 +11,39 @@ class About extends StatefulWidget {
 }
 
 class _AboutState extends State<About> {
+
+  String _version = '1.0.0';
+
+  _checkUpdate()async{
+    DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
+    try{
+      IosDeviceInfo _iosInfo = await _deviceInfo.iosInfo;
+      print(_iosInfo.model);
+      print(_iosInfo.systemName);
+      print(_iosInfo.systemVersion);
+      print(_iosInfo.name);
+    }catch(MissingPluginException) {
+      AndroidDeviceInfo _androidInfo = await _deviceInfo.androidInfo;
+      print(_androidInfo.brand);
+      print(_androidInfo.model);
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    _getCurrentVersion();
+  }
+
+  _getCurrentVersion()async{
+    PackageInfo _packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _version = _packageInfo.version;
+    });
+  }
+
+  @override
+  Widget build(BuildContext  context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('关于小店'),
@@ -33,7 +68,7 @@ class _AboutState extends State<About> {
               ),
               Container(
                 margin: EdgeInsets.only(bottom: 20),
-                child: Text('Version 1.0.0',style: TextStyle(
+                child: Text('Version $_version',style: TextStyle(
                   fontSize: 16.0
                 ),),
               )
@@ -60,7 +95,7 @@ class _AboutState extends State<About> {
             title: Text('检查新版本'),
             trailing: Icon(Icons.arrow_forward_ios),
             onTap: (){
-              showToast(context,'已是最新版本');
+              _checkUpdate();
             },
           ),
           Divider(),
